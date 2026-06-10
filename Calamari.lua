@@ -1,6 +1,7 @@
 local Calamari = { 
 	Options = {}, 
-	Folder = "Calamari", 
+	Folder = "Calamari",
+	Version = "1.0.1",
 	GetService = function(Service: string)
 		return cloneref and cloneref(game:GetService(Service)) or game:GetService(Service)
 	end
@@ -29,6 +30,7 @@ local Unloaded = false
 
 local CurrentTheme = "Calamari"
 local ThemedElements = {}
+local ThemedCallbacks = {}
 
 local Assets = {
 	InterFont = "rbxassetid://12187365364",
@@ -301,6 +303,11 @@ local function RegisterThemed(Instance, Property, Key)
 	})
 	
 	Instance[Property] = Themes[CurrentTheme][Key]
+end
+
+local function RegisterThemeCallback(Callback)
+	table.insert(ThemedCallbacks, Callback)
+	Callback(CurrentTheme)
 end
 
 function Calamari:Window(Settings)
@@ -2005,7 +2012,10 @@ function Calamari:Window(Settings)
 
 					local toggle1Transparency = {Enabled = 0, Disabled = 0.5}
 					local TogglerHeadTransparency = {Enabled = 0, Disabled = 0.85}
-					local TogglerHeadColor = {Enabled = Themes[CurrentTheme].Toggle, Disabled = Color3.fromRGB(255, 255, 255)}
+					local TogglerHeadColor = {
+						Enabled = Themes[CurrentTheme].Toggle,
+						Disabled = Color3.fromRGB(255,255,255)
+					}
 
 					local TweenSettings = {
 						Info = TweenInfo.new(0.15, Enum.EasingStyle.Quad),
@@ -2041,7 +2051,13 @@ function Calamari:Window(Settings)
 							callback(togglebool)
 						end
 					end
+					
+					RegisterThemeCallback(function()
+						TogglerHeadColor.Enabled = Themes[CurrentTheme].Toggle
 
+						NewState(ToggleFunctions.State)
+					end)
+					
 					NewState(togglebool)
 
 					local function Toggle()
@@ -5031,6 +5047,8 @@ function Calamari:Window(Settings)
 						})
 					end,
 				})
+				
+				print(WindowFunctions:GetVersion())
 			end
 
 			Tabs[Tabswitcher] = {
@@ -5624,6 +5642,7 @@ function Calamari:Window(Settings)
 	function WindowFunctions:SetUserInfoState(State)
 		_SetUserInfoState(State)
 	end
+	
 	function WindowFunctions:GetUserInfoState(State)
 		return showUserInfo
 	end
@@ -5632,15 +5651,19 @@ function Calamari:Window(Settings)
 		if not Themes[ThemeName] then
 			return false, "Theme '" .. ThemeName .. "' does not exist."
 		end
-		
+
 		CurrentTheme = ThemeName
-		
+
 		for _, entry in next, ThemedElements do
 			if entry.instance and entry.instance.Parent then
 				entry.instance[entry.property] = Themes[ThemeName][entry.key]
 			end
 		end
-		
+
+		for _, callback in next, ThemedCallbacks do
+			callback(ThemeName)
+		end
+
 		return true
 	end
 
@@ -5659,12 +5682,11 @@ function Calamari:Window(Settings)
 
 		return list
 	end
-	
-	WindowFunctions:SetTheme("Calamari")
 
 	function WindowFunctions:SetSize(Size)
 		base.Size = Size
 	end
+	
 	function WindowFunctions:GetSize(Size)
 		return base.Size
 	end
@@ -5672,10 +5694,15 @@ function Calamari:Window(Settings)
 	function WindowFunctions:SetScale(Scale)
 		baseUIScale.Scale = Scale
 	end
+	
 	function WindowFunctions:GetScale()
 		return baseUIScale.Scale
 	end
-
+	
+	function WindowFunctions:GetVersion()
+		return Calamari.Version
+	end
+	
 	local ClassParser = {
 		["Toggle"] = {
 			Save = function(Flag, data)
@@ -5910,7 +5937,9 @@ function Calamari:Window(Settings)
 
 		return out
 	end
-
+	
+	WindowFunctions:SetTheme("Calamari")
+	
 	calamari.Enabled = false
 
 	local assetList = {}
