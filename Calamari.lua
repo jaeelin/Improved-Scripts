@@ -28,6 +28,7 @@ local TabIndex = 0
 local Unloaded = false
 
 local CurrentTheme = "Calamari"
+local ThemedElements = {}
 
 local Assets = {
 	InterFont = "rbxassetid://12187365364",
@@ -288,8 +289,18 @@ local function GetGui()
 	return newGui
 end
 
-local function Tween(instance, tweeninfo, propertytable)
-	return TweenService:Create(instance, tweeninfo, propertytable)
+local function Tween(Instance, Info, Table)
+	return TweenService:Create(Instance, Info, Table)
+end
+
+local function RegisterThemed(Instance, Property, Key)
+	table.insert(ThemedElements, {
+		instance = Instance,
+		property = Property,
+		key = Key
+	})
+	
+	Instance[Property] = Themes[CurrentTheme][Key]
 end
 
 function Calamari:Window(Settings)
@@ -331,7 +342,7 @@ function Calamari:Window(Settings)
 	local base = Instance.new("Frame")
 	base.Name = "Base"
 	base.AnchorPoint = Vector2.new(0.5, 0.5)
-	base.BackgroundColor3 = Themes[CurrentTheme].Core
+	RegisterThemed(base, "BackgroundColor3", "Core")
 	base.BackgroundTransparency = Settings.AcrylicBlur and 0.05 or 0
 	base.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	base.BorderSizePixel = 0
@@ -366,7 +377,7 @@ function Calamari:Window(Settings)
 	local divider = Instance.new("Frame")
 	divider.Name = "Divider"
 	divider.AnchorPoint = Vector2.new(1, 0)
-	divider.BackgroundColor3 = Themes[CurrentTheme].Divider
+	RegisterThemed(divider, "BackgroundColor3", "Divider")
 	divider.BackgroundTransparency = 0.9
 	divider.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	divider.BorderSizePixel = 0
@@ -546,7 +557,7 @@ function Calamari:Window(Settings)
 	local divider2 = Instance.new("Frame")
 	divider2.Name = "Divider"
 	divider2.AnchorPoint = Vector2.new(0, 1)
-	divider2.BackgroundColor3 = Themes[CurrentTheme].Divider
+	RegisterThemed(divider2, "BackgroundColor3", "Divider")
 	divider2.BackgroundTransparency = 0.9
 	divider2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	divider2.BorderSizePixel = 0
@@ -573,7 +584,7 @@ function Calamari:Window(Settings)
 	local globalSettingsButton = Instance.new("ImageButton")
 	globalSettingsButton.Name = "GlobalSettingsButton"
 	globalSettingsButton.Image = Assets.Globe
-	globalSettingsButton.ImageColor3 = Themes[CurrentTheme].Global
+	RegisterThemed(globalSettingsButton, "ImageColor3", "Global")
 	globalSettingsButton.ImageTransparency = 0.5
 	globalSettingsButton.AnchorPoint = Vector2.new(1, 0.5)
 	globalSettingsButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -619,7 +630,7 @@ function Calamari:Window(Settings)
 		Enum.FontStyle.Normal
 	)
 	title.Text = Settings.Title
-	title.TextColor3 = Themes[CurrentTheme].Text
+	RegisterThemed(title, "TextColor3", "Text")
 	title.RichText = true
 	title.TextSize = 18
 	title.TextTransparency = 0.1
@@ -644,7 +655,7 @@ function Calamari:Window(Settings)
 	subtitle.RichText = true
 	subtitle.Text = Settings.Subtitle
 	subtitle.RichText = true
-	subtitle.TextColor3 = Themes[CurrentTheme].Text
+	RegisterThemed(subtitle, "TextColor3", "Text")
 	subtitle.TextSize = 12
 	subtitle.TextTransparency = 0.7
 	subtitle.TextTruncate = Enum.TextTruncate.SplitWord
@@ -757,7 +768,7 @@ function Calamari:Window(Settings)
 		Enum.FontStyle.Normal
 	)
 	displayName.Text = LocalPlayer.DisplayName
-	displayName.TextColor3 = Themes[CurrentTheme].Text
+	RegisterThemed(displayName, "TextColor3", "Text")
 	displayName.TextSize = 13
 	displayName.TextTransparency = 0.1
 	displayName.TextTruncate = Enum.TextTruncate.SplitWord
@@ -791,7 +802,7 @@ function Calamari:Window(Settings)
 		Enum.FontStyle.Normal
 	)
 	username.Text = "@" .. LocalPlayer.Name
-	username.TextColor3 = Themes[CurrentTheme].Text
+	RegisterThemed(username, "TextColor3", "Text")
 	username.TextSize = 12
 	username.TextTransparency = 0.7
 	username.TextTruncate = Enum.TextTruncate.SplitWord
@@ -968,7 +979,7 @@ function Calamari:Window(Settings)
 	moveIcon.Name = "MoveIcon"
 	moveIcon.Image = Assets.Transform
 	moveIcon.ImageTransparency = 0.7
-	moveIcon.ImageColor3 = Themes[CurrentTheme].Dragger
+	RegisterThemed(moveIcon, "ImageColor3", "Dragger")
 	moveIcon.AnchorPoint = Vector2.new(1, 0.5)
 	moveIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	moveIcon.BackgroundTransparency = 1
@@ -1091,7 +1102,7 @@ function Calamari:Window(Settings)
 	currentTab.RichText = true
 	currentTab.Text = ""
 	currentTab.RichText = true
-	currentTab.TextColor3 = Themes[CurrentTheme].Text
+	RegisterThemed(currentTab, "TextColor3", "Text")
 	currentTab.TextSize = 15
 	currentTab.TextTransparency = 0.5
 	currentTab.TextTruncate = Enum.TextTruncate.SplitWord
@@ -1116,7 +1127,7 @@ function Calamari:Window(Settings)
 	local globalSettings = Instance.new("Frame")
 	globalSettings.Name = "GlobalSettings"
 	globalSettings.AutomaticSize = Enum.AutomaticSize.XY
-	globalSettings.BackgroundColor3 = Themes[CurrentTheme].Core
+	RegisterThemed(globalSettings, "BackgroundColor3", "Core")
 	globalSettings.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	globalSettings.BorderSizePixel = 0
 	globalSettings.Position = UDim2.fromScale(0.298, 0.104)
@@ -1445,7 +1456,7 @@ function Calamari:Window(Settings)
 		settingName.FontFace = Font.new(Assets.InterFont)
 		settingName.Text = Settings.Name
 		settingName.RichText = true
-		settingName.TextColor3 = Themes[CurrentTheme].Text
+		RegisterThemed(settingName, "TextColor3", "Text")
 		settingName.TextSize = 13
 		settingName.TextTransparency = 0.5
 		settingName.TextTruncate = Enum.TextTruncate.SplitWord
@@ -1477,7 +1488,7 @@ function Calamari:Window(Settings)
 			Enum.FontStyle.Normal
 		)
 		checkmark.Text = "✓"
-		checkmark.TextColor3 = Themes[CurrentTheme].Text
+		RegisterThemed(checkmark, "TextColor3", "Text")
 		checkmark.TextSize = 13
 		checkmark.TextTransparency = 1
 		checkmark.TextXAlignment = Enum.TextXAlignment.Left
@@ -1581,7 +1592,7 @@ function Calamari:Window(Settings)
 		local divider3 = Instance.new("Frame")
 		divider3.Name = "Divider"
 		divider3.AnchorPoint = Vector2.new(0.5, 1)
-		divider3.BackgroundColor3 = Themes[CurrentTheme].Divider
+		RegisterThemed(divider3, "BackgroundColor3", "Divider")
 		divider3.BackgroundTransparency = 0.9
 		divider3.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		divider3.BorderSizePixel = 0
@@ -1657,7 +1668,7 @@ function Calamari:Window(Settings)
 				tabImage = Instance.new("ImageLabel")
 				tabImage.Name = "TabImage"
 				tabImage.Image = Settings.Image
-				tabImage.ImageColor3 = Themes[CurrentTheme].TabImage
+				RegisterThemed(tabImage, "ImageColor3", "TabImage")
 				tabImage.ImageTransparency = 0.5
 				tabImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				tabImage.BackgroundTransparency = 1
@@ -1676,7 +1687,7 @@ function Calamari:Window(Settings)
 			)
 			TabswitcherName.Text = Settings.Name
 			TabswitcherName.RichText = true
-			TabswitcherName.TextColor3 = Themes[CurrentTheme].TabName
+			RegisterThemed(TabswitcherName, "TextColor3", "TabName")
 			TabswitcherName.TextSize = 16
 			TabswitcherName.TextTransparency = 0.5
 			TabswitcherName.TextTruncate = Enum.TextTruncate.SplitWord
@@ -1841,7 +1852,7 @@ function Calamari:Window(Settings)
 					buttonInteract.Name = "ButtonInteract"
 					buttonInteract.FontFace = Font.new(Assets.InterFont)
 					buttonInteract.RichText = true
-					buttonInteract.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(buttonInteract, "TextColor3", "Text")
 					buttonInteract.TextSize = 13
 					buttonInteract.TextTransparency = 0.5
 					buttonInteract.TextTruncate = Enum.TextTruncate.AtEnd
@@ -1858,7 +1869,7 @@ function Calamari:Window(Settings)
 					ButtonImage.Name = "ButtonImage"
 					ButtonImage.Image = Assets.ButtonImage
 					ButtonImage.ImageTransparency = 0.5
-					ButtonImage.ImageColor3 = Themes[CurrentTheme].DropdownIndicator
+					RegisterThemed(ButtonImage, "ImageColor3", "DropdownIndicator")
 					ButtonImage.AnchorPoint = Vector2.new(1, 0.5)
 					ButtonImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 					ButtonImage.BackgroundTransparency = 1
@@ -1937,7 +1948,7 @@ function Calamari:Window(Settings)
 					toggleName.FontFace = Font.new(Assets.InterFont)
 					toggleName.Text = ToggleFunctions.Settings.Name
 					toggleName.RichText = true
-					toggleName.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(toggleName, "TextColor3", "Text")
 					toggleName.TextSize = 13
 					toggleName.TextTransparency = 0.5
 					toggleName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -2080,7 +2091,7 @@ function Calamari:Window(Settings)
 					sliderName.FontFace = Font.new(Assets.InterFont)
 					sliderName.Text = SliderFunctions.Settings.Name
 					sliderName.RichText = true
-					sliderName.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(sliderName, "TextColor3", "Text")
 					sliderName.TextSize = 13
 					sliderName.TextTransparency = 0.5
 					sliderName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -2108,7 +2119,7 @@ function Calamari:Window(Settings)
 					local sliderValue = Instance.new("TextBox")
 					sliderValue.Name = "SliderValue"
 					sliderValue.FontFace = Font.new(Assets.InterFont)
-					sliderValue.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(sliderValue, "TextColor3", "Text")
 					sliderValue.TextSize = 12
 					sliderValue.TextTransparency = 0.1
 					--sliderValue.TextTruncate = Enum.TextTruncate.AtEnd
@@ -2166,7 +2177,7 @@ function Calamari:Window(Settings)
 					sliderHead.Image = Assets.Sliderhead
 					sliderHead.AnchorPoint = Vector2.new(0.5, 0.5)
 					sliderHead.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-					sliderHead.ImageColor3 = Themes[CurrentTheme].Slider
+					RegisterThemed(sliderHead, "ImageColor3", "Slider")
 					sliderHead.BackgroundTransparency = 1
 					sliderHead.BorderColor3 = Color3.fromRGB(0, 0, 0)
 					sliderHead.BorderSizePixel = 0
@@ -2342,7 +2353,7 @@ function Calamari:Window(Settings)
 					inputName.FontFace = Font.new(Assets.InterFont)
 					inputName.Text = InputFunctions.Settings.Name
 					inputName.RichText = true
-					inputName.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(inputName, "TextColor3", "Text")
 					inputName.TextSize = 13
 					inputName.TextTransparency = 0.5
 					inputName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -2361,8 +2372,8 @@ function Calamari:Window(Settings)
 					inputBox.Name = "InputBox"
 					inputBox.FontFace = Font.new(Assets.InterFont)
 					inputBox.Text = "Hello world!"
-					inputBox.TextColor3 = Themes[CurrentTheme].Text
-					inputBox.PlaceholderColor3 = Themes[CurrentTheme].Placeholder
+					RegisterThemed(inputBox, "TextColor3", "Text")
+					RegisterThemed(inputBox, "PlaceholderColor3", "Placeholder")
 					inputBox.TextSize = 12
 					inputBox.TextTransparency = 0.1
 					inputBox.AnchorPoint = Vector2.new(1, 0.5)
@@ -2519,7 +2530,7 @@ function Calamari:Window(Settings)
 					keybindName.FontFace = Font.new(Assets.InterFont)
 					keybindName.Text = KeybindFunctions.Settings.Name
 					keybindName.RichText = true
-					keybindName.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(keybindName, "TextColor3", "Text")
 					keybindName.TextSize = 13
 					keybindName.TextTransparency = 0.5
 					keybindName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -2728,7 +2739,7 @@ function Calamari:Window(Settings)
 					dropdownName.FontFace = Font.new(Assets.InterFont)
 					dropdownName.Text = Settings.Default and (DropdownFunctions.Settings.Name .. " • " .. table.concat(Selected, ", ")) or (DropdownFunctions.Settings.Name .. "...")
 					dropdownName.RichText = true
-					dropdownName.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(dropdownName, "TextColor3", "Text")
 					dropdownName.TextSize = 13
 					dropdownName.TextTransparency = 0.5
 					dropdownName.TextTruncate = Enum.TextTruncate.SplitWord
@@ -2757,7 +2768,7 @@ function Calamari:Window(Settings)
 					dropdownImage.Name = "DropdownImage"
 					dropdownImage.Image = Assets.Dropdown
 					dropdownImage.ImageTransparency = 0.5
-					dropdownImage.ImageColor3 = Themes[CurrentTheme].DropdownImage
+					RegisterThemed(dropdownImage, "ImageColor3", "DropdownImage")
 					dropdownImage.AnchorPoint = Vector2.new(1, 0)
 					dropdownImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 					dropdownImage.BackgroundTransparency = 1
@@ -2808,7 +2819,7 @@ function Calamari:Window(Settings)
 					local SearchIcon = Instance.new("ImageLabel")
 					SearchIcon.Name = "SearchIcon"
 					SearchIcon.Image = Assets.SearchIcon
-					SearchIcon.ImageColor3 = Themes[CurrentTheme].Placeholder
+					RegisterThemed(SearchIcon, "ImageColor3", "Placeholder")
 					SearchIcon.AnchorPoint = Vector2.new(0, 0.5)
 					SearchIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 					SearchIcon.BackgroundTransparency = 1
@@ -2831,10 +2842,10 @@ function Calamari:Window(Settings)
 						Enum.FontWeight.Medium,
 						Enum.FontStyle.Normal
 					)
-					searchBox.PlaceholderColor3 = Themes[CurrentTheme].Placeholder
+					RegisterThemed(searchBox, "PlaceholderColor3", "Placeholder")
 					searchBox.PlaceholderText = "Search..."
 					searchBox.Text = ""
-					searchBox.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(searchBox, "TextColor3", "Text")
 					searchBox.TextSize = 14
 					searchBox.TextXAlignment = Enum.TextXAlignment.Left
 					searchBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -3019,7 +3030,7 @@ function Calamari:Window(Settings)
 						optionName.FontFace = Font.new(Assets.InterFont)
 						optionName.Text = v
 						optionName.RichText = true
-						optionName.TextColor3 = Themes[CurrentTheme].Text
+						RegisterThemed(optionName, "TextColor3", "Text")
 						optionName.TextSize = 13
 						optionName.TextTransparency = 0.5
 						optionName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -3046,7 +3057,7 @@ function Calamari:Window(Settings)
 						checkmark.Name = "Checkmark"
 						checkmark.FontFace = Font.new(Assets.InterFont)
 						checkmark.Text = "✓"
-						checkmark.TextColor3 = Themes[CurrentTheme].Text
+						RegisterThemed(checkmark, "TextColor3", "Text")
 						checkmark.TextSize = 13
 						checkmark.TextTransparency = 1
 						checkmark.TextXAlignment = Enum.TextXAlignment.Left
@@ -3283,7 +3294,7 @@ function Calamari:Window(Settings)
 					colorpickerName.Name = "KeybindName"
 					colorpickerName.FontFace = Font.new(Assets.InterFont)
 					colorpickerName.Text = Settings.Name
-					colorpickerName.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(colorpickerName, "TextColor3", "Text")
 					colorpickerName.TextSize = 13
 					colorpickerName.TextTransparency = 0.5
 					colorpickerName.RichText = true
@@ -3366,7 +3377,7 @@ function Calamari:Window(Settings)
 					prompt.Name = "Prompt"
 					prompt.AnchorPoint = Vector2.new(0.5, 0.5)
 					prompt.AutomaticSize = Enum.AutomaticSize.Y
-					prompt.BackgroundColor3 = Themes[CurrentTheme].Core
+					RegisterThemed(prompt, "BackgroundColor3", "Core")
 					prompt.BorderColor3 = Color3.fromRGB(0, 0, 0)
 					prompt.BorderSizePixel = 0
 					prompt.Position = UDim2.fromScale(0.5, 0.5)
@@ -4073,7 +4084,7 @@ function Calamari:Window(Settings)
 					confirm.TextTruncate = Enum.TextTruncate.AtEnd
 					confirm.AutoButtonColor = false
 					confirm.AutomaticSize = Enum.AutomaticSize.Y
-					confirm.BackgroundColor3 = Themes[CurrentTheme].Dialogue
+					RegisterThemed(confirm, "BackgroundColor3", "Dialogue")
 					confirm.BorderColor3 = Color3.fromRGB(0, 0, 0)
 					confirm.BorderSizePixel = 0
 					confirm.Size = UDim2.fromScale(1, 0)
@@ -4107,7 +4118,7 @@ function Calamari:Window(Settings)
 					cancel.TextTruncate = Enum.TextTruncate.AtEnd
 					cancel.AutoButtonColor = false
 					cancel.AutomaticSize = Enum.AutomaticSize.Y
-					cancel.BackgroundColor3 = Themes[CurrentTheme].Dialogue
+					RegisterThemed(cancel, "BackgroundColor3", "Dialogue")
 					cancel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 					cancel.BorderSizePixel = 0
 					cancel.Size = UDim2.fromScale(1, 0)
@@ -4160,7 +4171,7 @@ function Calamari:Window(Settings)
 					)
 					paragraphHeader.RichText = true
 					paragraphHeader.Text = ColorpickerFunctions.Settings.Name
-					paragraphHeader.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(paragraphHeader, "TextColor3", "Text")
 					paragraphHeader.TextSize = 18
 					paragraphHeader.TextTransparency = 0.4
 					paragraphHeader.TextWrapped = true
@@ -4574,7 +4585,7 @@ function Calamari:Window(Settings)
 					)
 					headerText.RichText = true
 					headerText.Text = HeaderFunctions.Settings.Text or HeaderFunctions.Settings.Name
-					headerText.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(headerText, "TextColor3", "Text")
 					headerText.TextSize = 16
 					headerText.TextTransparency = 0.3
 					headerText.TextWrapped = true
@@ -4618,7 +4629,7 @@ function Calamari:Window(Settings)
 					labelText.FontFace = Font.new(Assets.InterFont)
 					labelText.RichText = true
 					labelText.Text = LabelFunctions.Settings.Text or LabelFunctions.Settings.Name
-					labelText.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(labelText, "TextColor3", "Text")
 					labelText.TextSize = 13
 					labelText.TextTransparency = 0.5
 					labelText.TextWrapped = true
@@ -4662,7 +4673,7 @@ function Calamari:Window(Settings)
 					subLabelText.FontFace = Font.new(Assets.InterFont)
 					subLabelText.RichText = true
 					subLabelText.Text = SubLabelFunctions.Settings.Text or SubLabelFunctions.Settings.Name
-					subLabelText.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(subLabelText, "TextColor3", "Text")
 					subLabelText.TextSize = 12
 					subLabelText.TextTransparency = 0.7
 					subLabelText.TextWrapped = true
@@ -4710,7 +4721,7 @@ function Calamari:Window(Settings)
 					)
 					paragraphHeader.RichText = true
 					paragraphHeader.Text = ParagraphFunctions.Settings.Header
-					paragraphHeader.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(paragraphHeader, "TextColor3", "Text")
 					paragraphHeader.TextSize = 15
 					paragraphHeader.TextTransparency = 0.4
 					paragraphHeader.TextWrapped = true
@@ -4734,7 +4745,7 @@ function Calamari:Window(Settings)
 					paragraphBody.FontFace = Font.new(Assets.InterFont)
 					paragraphBody.RichText = true
 					paragraphBody.Text = ParagraphFunctions.Settings.Body
-					paragraphBody.TextColor3 = Themes[CurrentTheme].Text
+					RegisterThemed(paragraphBody, "TextColor3", "Text")
 					paragraphBody.TextSize = 13
 					paragraphBody.TextTransparency = 0.5
 					paragraphBody.TextWrapped = true
@@ -5003,6 +5014,23 @@ function Calamari:Window(Settings)
 					local name = readfile(Calamari.Folder .. "/settings/autoload.txt")
 					autoloadLabel:UpdateName("Autoload config: " .. name)
 				end
+				
+				local themeSelection = configSection:Dropdown({
+					Name = "Select Theme",
+					Multi = false,
+					Required = false,
+					Options = WindowFunctions:GetThemes(),
+					Default = WindowFunctions:GetTheme(),
+					Callback = function(Value)
+						if not Value then return end
+						WindowFunctions:SetTheme(Value)
+						WindowFunctions:Notify({
+							Title = WindowFunctions.Settings.Title,
+							Description = "Theme changed to " .. Value,
+							Lifetime = 3
+						})
+					end,
+				})
 			end
 
 			Tabs[Tabswitcher] = {
@@ -5025,7 +5053,7 @@ function Calamari:Window(Settings)
 		notification.Name = "Notification"
 		notification.AnchorPoint = Vector2.new(0.5, 0.5)
 		notification.AutomaticSize = Enum.AutomaticSize.Y
-		notification.BackgroundColor3 = Themes[CurrentTheme].Core
+		RegisterThemed(notification, "BackgroundColor3", "Core")
 		notification.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		notification.BorderSizePixel = 0
 		notification.Position = UDim2.fromScale(0.5, 0.5)
@@ -5260,7 +5288,7 @@ function Calamari:Window(Settings)
 		prompt.Name = "Prompt"
 		prompt.AnchorPoint = Vector2.new(0.5, 0.5)
 		prompt.AutomaticSize = Enum.AutomaticSize.Y
-		prompt.BackgroundColor3 = Themes[CurrentTheme].Core
+		RegisterThemed(prompt, "BackgroundColor3", "Core")
 		prompt.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		prompt.BorderSizePixel = 0
 		prompt.Position = UDim2.fromScale(0.5, 0.5)
@@ -5412,7 +5440,7 @@ function Calamari:Window(Settings)
 			button.TextTruncate = Enum.TextTruncate.AtEnd
 			button.AutoButtonColor = false
 			button.AutomaticSize = Enum.AutomaticSize.Y
-			button.BackgroundColor3 = Themes[CurrentTheme].Dialogue
+			RegisterThemed(button, "BackgroundColor3", "Dialogue")
 			button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			button.BorderSizePixel = 0
 			button.Size = UDim2.fromScale(1, 0)
@@ -5599,6 +5627,40 @@ function Calamari:Window(Settings)
 	function WindowFunctions:GetUserInfoState(State)
 		return showUserInfo
 	end
+	
+	function WindowFunctions:SetTheme(ThemeName)
+		if not Themes[ThemeName] then
+			return false, "Theme '" .. ThemeName .. "' does not exist."
+		end
+		
+		CurrentTheme = ThemeName
+		
+		for _, entry in next, ThemedElements do
+			if entry.instance and entry.instance.Parent then
+				entry.instance[entry.property] = Themes[ThemeName][entry.key]
+			end
+		end
+		
+		return true
+	end
+
+	function WindowFunctions:GetTheme()
+		return CurrentTheme
+	end
+
+	function WindowFunctions:GetThemes()
+		local list = {}
+
+		for name in next, Themes do
+			table.insert(list, name)
+		end
+
+		table.sort(list)
+
+		return list
+	end
+	
+	WindowFunctions:SetTheme("Calamari")
 
 	function WindowFunctions:SetSize(Size)
 		base.Size = Size
