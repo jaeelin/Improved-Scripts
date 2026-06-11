@@ -1,3 +1,7 @@
+--[[
+THIS IS A MACLIB FORK
+MODIFICATIONS MADE FOR SCRIPT USAGE.
+]]
 local Calamari = { 
 	Options = {}, 
 	Folder = "Calamari",
