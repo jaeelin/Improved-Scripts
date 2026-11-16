@@ -1,51 +1,318 @@
-local MacLib = { 
+--[[
+THIS IS A MACLIB FORK
+MODIFICATIONS MADE FOR SCRIPT USAGE.
+]]
+
+local Calamari = { 
 	Options = {}, 
-	Folder = "Maclib", 
-	GetService = function(service)
-		return cloneref and cloneref(game:GetService(service)) or game:GetService(service)
+	Keybinds = {},
+	Folder = "Calamari",
+	Version = "1.0.2",
+	GetService = function(Service: string)
+		return cloneref and cloneref(game:GetService(Service)) or game:GetService(Service)
 	end
 }
 
---// Services
-local TweenService = MacLib.GetService("TweenService")
-local RunService = MacLib.GetService("RunService")
-local HttpService = MacLib.GetService("HttpService")
-local ContentProvider = MacLib.GetService("ContentProvider")
-local UserInputService = MacLib.GetService("UserInputService")
-local Lighting = MacLib.GetService("Lighting")
-local Players = MacLib.GetService("Players")
+local TweenService = Calamari.GetService("TweenService")
+local RunService = Calamari.GetService("RunService")
+local HttpService = Calamari.GetService("HttpService")
+local ContentProvider = Calamari.GetService("ContentProvider")
+local UserInputService = Calamari.GetService("UserInputService")
+local Lighting = Calamari.GetService("Lighting")
+local Players = Calamari.GetService("Players")
 
---// Variables
-local isStudio = RunService:IsStudio()
 local LocalPlayer = Players.LocalPlayer
 
-local windowState
-local acrylicBlur
-local hasGlobalSetting
+local IsStudio = RunService:IsStudio()
 
-local tabs = {}
-local currentTabInstance = nil
-local tabIndex = 0
-local unloaded = false
+local WindowState
+local AcrylicBlur
+local HasGlobalSetting
 
-local assets = {
-	interFont = "rbxassetid://12187365364",
-	userInfoBlurred = "rbxassetid://18824089198",
-	toggleBackground = "rbxassetid://18772190202",
-	togglerHead = "rbxassetid://18772309008",
-	buttonImage = "rbxassetid://10709791437",
-	searchIcon = "rbxassetid://86737463322606",
-	colorWheel = "rbxassetid://2849458409",
-	colorTarget = "rbxassetid://73265255323268",
-	grid = "rbxassetid://121484455191370",
-	globe = "rbxassetid://108952102602834",
-	transform = "rbxassetid://90336395745819",
-	dropdown = "rbxassetid://18865373378",
-	sliderbar = "rbxassetid://18772615246",
-	sliderhead = "rbxassetid://18772834246",
+local Tabs = {}
+local CurrentTabInstance = nil
+local TabIndex = 0
+local Unloaded = false
+
+local CurrentTheme = "Calamari"
+local ThemedElements = {}
+local ThemedCallbacks = {}
+
+local Assets = {
+	InterFont = "rbxassetid://12187365364",
+	UserInfoBlurred = "rbxassetid://18824089198",
+	ToggleBackground = "rbxassetid://18772190202",
+	TogglerHead = "rbxassetid://18772309008",
+	ButtonImage = "rbxassetid://10709791437",
+	SearchIcon = "rbxassetid://86737463322606",
+	ColorWheel = "rbxassetid://85695059746508",
+	ColorTarget = "rbxassetid://73265255323268",
+	Grid = "rbxassetid://121484455191370",
+	Globe = "rbxassetid://108952102602834",
+	Transform = "rbxassetid://90336395745819",
+	Dropdown = "rbxassetid://18865373378",
+	Sliderbar = "rbxassetid://18772615246",
+	Sliderhead = "rbxassetid://18772834246",
 }
 
---// Functions
+local Themes = {
+	Calamari = {
+		Core = Color3.fromRGB(12, 10, 20),
+		Divider = Color3.fromRGB(200, 180, 255),
+		Text = Color3.fromRGB(235, 225, 255),
+		Placeholder = Color3.fromRGB(170, 155, 210),
+		DropdownImage = Color3.fromRGB(200, 180, 255),
+		DropdownIndicator = Color3.fromRGB(220, 205, 255),
+		Global = Color3.fromRGB(220, 205, 255),
+		Dragger = Color3.fromRGB(200, 180, 255),
+		TabImage = Color3.fromRGB(200, 180, 255),
+		TabName = Color3.fromRGB(220, 205, 255),
+		Dialogue = Color3.fromRGB(35, 25, 55),
+		Toggle = Color3.fromRGB(200, 180, 255),
+		Slider = Color3.fromRGB(200, 180, 255)
+	},
+
+	["French Exit"] = {
+		Core = Color3.fromRGB(28, 20, 32),
+		Divider = Color3.fromRGB(215, 110, 140),
+		Text = Color3.fromRGB(255, 248, 238),
+		Placeholder = Color3.fromRGB(190, 160, 170),
+		DropdownImage = Color3.fromRGB(215, 110, 140),
+		DropdownIndicator = Color3.fromRGB(240, 180, 200),
+		Global = Color3.fromRGB(240, 180, 200),
+		Dragger = Color3.fromRGB(215, 110, 140),
+		TabImage = Color3.fromRGB(215, 110, 140),
+		TabName = Color3.fromRGB(255, 230, 220),
+		Dialogue = Color3.fromRGB(55, 30, 45),
+		Toggle = Color3.fromRGB(225, 120, 155),
+		Slider = Color3.fromRGB(215, 110, 140)
+	},
+
+	["Who Really Cares"] = {
+		Core = Color3.fromRGB(35, 15, 18),
+		Divider = Color3.fromRGB(220, 35, 55),
+		Text = Color3.fromRGB(255, 245, 240),
+		Placeholder = Color3.fromRGB(190, 130, 140),
+		DropdownImage = Color3.fromRGB(220, 35, 55),
+		DropdownIndicator = Color3.fromRGB(60, 120, 220),
+		Global = Color3.fromRGB(60, 120, 220),
+		Dragger = Color3.fromRGB(220, 35, 55),
+		TabImage = Color3.fromRGB(220, 35, 55),
+		TabName = Color3.fromRGB(255, 220, 215),
+		Dialogue = Color3.fromRGB(55, 20, 25),
+		Toggle = Color3.fromRGB(230, 45, 65),
+		Slider = Color3.fromRGB(60, 120, 220)
+	},
+
+	["The Night in Question"] = {
+		Core = Color3.fromRGB(12, 14, 22),
+		Divider = Color3.fromRGB(120, 150, 255),
+		Text = Color3.fromRGB(235, 240, 255),
+		Placeholder = Color3.fromRGB(140, 150, 185),
+		DropdownImage = Color3.fromRGB(120, 150, 255),
+		DropdownIndicator = Color3.fromRGB(180, 200, 255),
+		Global = Color3.fromRGB(180, 200, 255),
+		Dragger = Color3.fromRGB(120, 150, 255),
+		TabImage = Color3.fromRGB(120, 150, 255),
+		TabName = Color3.fromRGB(220, 230, 255),
+		Dialogue = Color3.fromRGB(22, 28, 45),
+		Toggle = Color3.fromRGB(140, 170, 255),
+		Slider = Color3.fromRGB(120, 150, 255)
+	},
+
+	Nebula = {
+		Core = Color3.fromRGB(18, 12, 28),
+		Divider = Color3.fromRGB(180, 90, 255),
+		Text = Color3.fromRGB(220, 200, 255),
+		Placeholder = Color3.fromRGB(150, 130, 190),
+		DropdownImage = Color3.fromRGB(180, 90, 255),
+		DropdownIndicator = Color3.fromRGB(200, 150, 255),
+		Global = Color3.fromRGB(200, 150, 255),
+		Dragger = Color3.fromRGB(180, 90, 255),
+		TabImage = Color3.fromRGB(180, 90, 255),
+		TabName = Color3.fromRGB(200, 150, 255),
+		Dialogue = Color3.fromRGB(40, 25, 70),
+		Toggle = Color3.fromRGB(200, 120, 255),
+		Slider = Color3.fromRGB(180, 90, 255)
+	},
+
+	Mint = {
+		Core = Color3.fromRGB(20, 30, 25),
+		Divider = Color3.fromRGB(150, 255, 200),
+		Text = Color3.fromRGB(200, 255, 220),
+		Placeholder = Color3.fromRGB(120, 180, 150),
+		DropdownImage = Color3.fromRGB(150, 255, 200),
+		DropdownIndicator = Color3.fromRGB(120, 220, 170),
+		Global = Color3.fromRGB(180, 255, 220),
+		Dragger = Color3.fromRGB(150, 255, 200),
+		TabImage = Color3.fromRGB(150, 255, 200),
+		TabName = Color3.fromRGB(180, 255, 220),
+		Dialogue = Color3.fromRGB(35, 55, 45),
+		Toggle = Color3.fromRGB(120, 255, 180),
+		Slider = Color3.fromRGB(150, 255, 200)
+	},
+
+	Abyss = {
+		Core = Color3.fromRGB(10, 15, 25),
+		Divider = Color3.fromRGB(90, 180, 255),
+		Text = Color3.fromRGB(200, 220, 255),
+		Placeholder = Color3.fromRGB(120, 150, 190),
+		DropdownImage = Color3.fromRGB(90, 180, 255),
+		DropdownIndicator = Color3.fromRGB(120, 200, 255),
+		Global = Color3.fromRGB(120, 200, 255),
+		Dragger = Color3.fromRGB(90, 180, 255),
+		TabImage = Color3.fromRGB(90, 180, 255),
+		TabName = Color3.fromRGB(120, 200, 255),
+		Dialogue = Color3.fromRGB(20, 35, 55),
+		Toggle = Color3.fromRGB(70, 160, 255),
+		Slider = Color3.fromRGB(90, 180, 255)
+	},
+
+	Sakura = {
+		Core = Color3.fromRGB(30, 20, 30),
+		Divider = Color3.fromRGB(255, 180, 210),
+		Text = Color3.fromRGB(255, 210, 230),
+		Placeholder = Color3.fromRGB(180, 150, 170),
+		DropdownImage = Color3.fromRGB(255, 180, 210),
+		DropdownIndicator = Color3.fromRGB(255, 200, 220),
+		Global = Color3.fromRGB(255, 200, 220),
+		Dragger = Color3.fromRGB(255, 180, 210),
+		TabImage = Color3.fromRGB(255, 180, 210),
+		TabName = Color3.fromRGB(255, 200, 220),
+		Dialogue = Color3.fromRGB(50, 35, 55),
+		Toggle = Color3.fromRGB(255, 150, 190),
+		Slider = Color3.fromRGB(255, 180, 210)
+	},
+
+	Neon = {
+		Core = Color3.fromRGB(10, 10, 10),
+		Divider = Color3.fromRGB(0, 255, 180),
+		Text = Color3.fromRGB(0, 255, 200),
+		Placeholder = Color3.fromRGB(0, 180, 150),
+		DropdownImage = Color3.fromRGB(0, 255, 180),
+		DropdownIndicator = Color3.fromRGB(0, 255, 150),
+		Global = Color3.fromRGB(0, 255, 200),
+		Dragger = Color3.fromRGB(0, 255, 180),
+		TabImage = Color3.fromRGB(0, 255, 180),
+		TabName = Color3.fromRGB(0, 255, 200),
+		Dialogue = Color3.fromRGB(20, 20, 20),
+		Toggle = Color3.fromRGB(0, 255, 150),
+		Slider = Color3.fromRGB(0, 255, 180)
+	},
+
+	Sunset = {
+		Core = Color3.fromRGB(35, 15, 20),
+		Divider = Color3.fromRGB(255, 160, 120),
+		Text = Color3.fromRGB(255, 210, 190),
+		Placeholder = Color3.fromRGB(180, 130, 120),
+		DropdownImage = Color3.fromRGB(255, 160, 120),
+		DropdownIndicator = Color3.fromRGB(255, 180, 140),
+		Global = Color3.fromRGB(255, 180, 140),
+		Dragger = Color3.fromRGB(255, 160, 120),
+		TabImage = Color3.fromRGB(255, 160, 120),
+		TabName = Color3.fromRGB(255, 180, 140),
+		Dialogue = Color3.fromRGB(55, 25, 30),
+		Toggle = Color3.fromRGB(255, 130, 100),
+		Slider = Color3.fromRGB(255, 160, 120)
+	},
+
+	Forest = {
+		Core = Color3.fromRGB(15, 25, 20),
+		Divider = Color3.fromRGB(120, 200, 140),
+		Text = Color3.fromRGB(200, 240, 210),
+		Placeholder = Color3.fromRGB(120, 160, 130),
+		DropdownImage = Color3.fromRGB(120, 200, 140),
+		DropdownIndicator = Color3.fromRGB(150, 220, 170),
+		Global = Color3.fromRGB(150, 220, 170),
+		Dragger = Color3.fromRGB(120, 200, 140),
+		TabImage = Color3.fromRGB(120, 200, 140),
+		TabName = Color3.fromRGB(150, 220, 170),
+		Dialogue = Color3.fromRGB(30, 45, 35),
+		Toggle = Color3.fromRGB(100, 180, 130),
+		Slider = Color3.fromRGB(120, 200, 140)
+	},
+
+	Arctic = {
+		Core = Color3.fromRGB(20, 25, 35),
+		Divider = Color3.fromRGB(180, 220, 255),
+		Text = Color3.fromRGB(220, 240, 255),
+		Placeholder = Color3.fromRGB(150, 170, 200),
+		DropdownImage = Color3.fromRGB(180, 220, 255),
+		DropdownIndicator = Color3.fromRGB(200, 230, 255),
+		Global = Color3.fromRGB(200, 230, 255),
+		Dragger = Color3.fromRGB(180, 220, 255),
+		TabImage = Color3.fromRGB(180, 220, 255),
+		TabName = Color3.fromRGB(200, 230, 255),
+		Dialogue = Color3.fromRGB(35, 45, 60),
+		Toggle = Color3.fromRGB(150, 200, 255),
+		Slider = Color3.fromRGB(180, 220, 255)
+	},
+
+	Obsidian = {
+		Core = Color3.fromRGB(10, 10, 10),
+		Divider = Color3.fromRGB(120, 120, 120),
+		Text = Color3.fromRGB(220, 220, 220),
+		Placeholder = Color3.fromRGB(150, 150, 150),
+		DropdownImage = Color3.fromRGB(150, 150, 150),
+		DropdownIndicator = Color3.fromRGB(180, 180, 180),
+		Global = Color3.fromRGB(200, 200, 200),
+		Dragger = Color3.fromRGB(150, 150, 150),
+		TabImage = Color3.fromRGB(150, 150, 150),
+		TabName = Color3.fromRGB(200, 200, 200),
+		Dialogue = Color3.fromRGB(25, 25, 25),
+		Toggle = Color3.fromRGB(180, 180, 180),
+		Slider = Color3.fromRGB(150, 150, 150)
+	},
+
+	Azure = {
+		Core = Color3.fromRGB(15, 20, 35),
+		Divider = Color3.fromRGB(120, 170, 255),
+		Text = Color3.fromRGB(210, 230, 255),
+		Placeholder = Color3.fromRGB(140, 160, 200),
+		DropdownImage = Color3.fromRGB(120, 170, 255),
+		DropdownIndicator = Color3.fromRGB(150, 190, 255),
+		Global = Color3.fromRGB(150, 190, 255),
+		Dragger = Color3.fromRGB(120, 170, 255),
+		TabImage = Color3.fromRGB(120, 170, 255),
+		TabName = Color3.fromRGB(150, 190, 255),
+		Dialogue = Color3.fromRGB(30, 40, 60),
+		Toggle = Color3.fromRGB(100, 150, 255),
+		Slider = Color3.fromRGB(120, 170, 255)
+	},
+
+	Vaporwave = {
+		Core = Color3.fromRGB(25, 15, 35),
+		Divider = Color3.fromRGB(255, 120, 200),
+		Text = Color3.fromRGB(255, 180, 240),
+		Placeholder = Color3.fromRGB(180, 120, 200),
+		DropdownImage = Color3.fromRGB(255, 120, 200),
+		DropdownIndicator = Color3.fromRGB(120, 220, 255),
+		Global = Color3.fromRGB(255, 150, 220),
+		Dragger = Color3.fromRGB(255, 120, 200),
+		TabImage = Color3.fromRGB(255, 120, 200),
+		TabName = Color3.fromRGB(120, 220, 255),
+		Dialogue = Color3.fromRGB(40, 25, 60),
+		Toggle = Color3.fromRGB(255, 100, 180),
+		Slider = Color3.fromRGB(120, 220, 255)
+	},
+
+	Terminal = {
+		Core = Color3.fromRGB(5, 5, 5),
+		Divider = Color3.fromRGB(0, 255, 0),
+		Text = Color3.fromRGB(180, 255, 180),
+		Placeholder = Color3.fromRGB(90, 150, 90),
+		DropdownImage = Color3.fromRGB(0, 255, 0),
+		DropdownIndicator = Color3.fromRGB(0, 200, 0),
+		Global = Color3.fromRGB(0, 255, 0),
+		Dragger = Color3.fromRGB(0, 255, 0),
+		TabImage = Color3.fromRGB(0, 255, 0),
+		TabName = Color3.fromRGB(0, 255, 0),
+		Dialogue = Color3.fromRGB(15, 15, 15),
+		Toggle = Color3.fromRGB(0, 255, 0),
+		Slider = Color3.fromRGB(0, 255, 0)
+	}
+}
+
 local function GetGui()
 	local newGui = Instance.new("ScreenGui")
 	newGui.ScreenInsets = Enum.ScreenInsets.None
@@ -56,26 +323,40 @@ local function GetGui()
 	local parent = RunService:IsStudio() 
 		and LocalPlayer:FindFirstChild("PlayerGui")
 		or (gethui and gethui())
-		or (cloneref and cloneref(MacLib.GetService("CoreGui")) or MacLib.GetService("CoreGui"))
+		or (cloneref and cloneref(Calamari.GetService("CoreGui")) or Calamari.GetService("CoreGui"))
 
 	newGui.Parent = parent
 	return newGui
 end
 
-local function Tween(instance, tweeninfo, propertytable)
-	return TweenService:Create(instance, tweeninfo, propertytable)
+local function Tween(Instance, Info, Table)
+	return TweenService:Create(Instance, Info, Table)
 end
 
---// Library Functions
-function MacLib:Window(Settings)
+local function RegisterThemed(Instance, Property, Key)
+	table.insert(ThemedElements, {
+		instance = Instance,
+		property = Property,
+		key = Key
+	})
+
+	Instance[Property] = Themes[CurrentTheme][Key]
+end
+
+local function RegisterThemeCallback(Callback)
+	table.insert(ThemedCallbacks, Callback)
+	Callback(CurrentTheme)
+end
+
+function Calamari:Window(Settings)
 	local WindowFunctions = {Settings = Settings}
 	if Settings.AcrylicBlur ~= nil then
-		acrylicBlur = Settings.AcrylicBlur
+		AcrylicBlur = Settings.AcrylicBlur
 	else
-		acrylicBlur = true
+		AcrylicBlur = true
 	end
 
-	local macLib = GetGui()
+	local calamari = GetGui()
 
 	local notifications = Instance.new("Frame")
 	notifications.Name = "Notifications"
@@ -84,7 +365,7 @@ function MacLib:Window(Settings)
 	notifications.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	notifications.BorderSizePixel = 0
 	notifications.Size = UDim2.fromScale(1, 1)
-	notifications.Parent = macLib
+	notifications.Parent = calamari
 	notifications.ZIndex = 2
 
 	local notificationsUIListLayout = Instance.new("UIListLayout")
@@ -106,7 +387,7 @@ function MacLib:Window(Settings)
 	local base = Instance.new("Frame")
 	base.Name = "Base"
 	base.AnchorPoint = Vector2.new(0.5, 0.5)
-	base.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+	RegisterThemed(base, "BackgroundColor3", "Core")
 	base.BackgroundTransparency = Settings.AcrylicBlur and 0.05 or 0
 	base.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	base.BorderSizePixel = 0
@@ -141,7 +422,7 @@ function MacLib:Window(Settings)
 	local divider = Instance.new("Frame")
 	divider.Name = "Divider"
 	divider.AnchorPoint = Vector2.new(1, 0)
-	divider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	RegisterThemed(divider, "BackgroundColor3", "Divider")
 	divider.BackgroundTransparency = 0.9
 	divider.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	divider.BorderSizePixel = 0
@@ -321,7 +602,7 @@ function MacLib:Window(Settings)
 	local divider2 = Instance.new("Frame")
 	divider2.Name = "Divider"
 	divider2.AnchorPoint = Vector2.new(0, 1)
-	divider2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	RegisterThemed(divider2, "BackgroundColor3", "Divider")
 	divider2.BackgroundTransparency = 0.9
 	divider2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	divider2.BorderSizePixel = 0
@@ -347,7 +628,8 @@ function MacLib:Window(Settings)
 
 	local globalSettingsButton = Instance.new("ImageButton")
 	globalSettingsButton.Name = "GlobalSettingsButton"
-	globalSettingsButton.Image = assets.globe
+	globalSettingsButton.Image = Assets.Globe
+	RegisterThemed(globalSettingsButton, "ImageColor3", "Global")
 	globalSettingsButton.ImageTransparency = 0.5
 	globalSettingsButton.AnchorPoint = Vector2.new(1, 0.5)
 	globalSettingsButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -388,12 +670,12 @@ function MacLib:Window(Settings)
 	local title = Instance.new("TextLabel")
 	title.Name = "Title"
 	title.FontFace = Font.new(
-		assets.interFont,
+		Assets.InterFont,
 		Enum.FontWeight.SemiBold,
 		Enum.FontStyle.Normal
 	)
 	title.Text = Settings.Title
-	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	RegisterThemed(title, "TextColor3", "Text")
 	title.RichText = true
 	title.TextSize = 18
 	title.TextTransparency = 0.1
@@ -411,14 +693,14 @@ function MacLib:Window(Settings)
 	local subtitle = Instance.new("TextLabel")
 	subtitle.Name = "Subtitle"
 	subtitle.FontFace = Font.new(
-		assets.interFont,
+		Assets.InterFont,
 		Enum.FontWeight.Medium,
 		Enum.FontStyle.Normal
 	)
 	subtitle.RichText = true
 	subtitle.Text = Settings.Subtitle
 	subtitle.RichText = true
-	subtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+	RegisterThemed(subtitle, "TextColor3", "Text")
 	subtitle.TextSize = 12
 	subtitle.TextTransparency = 0.7
 	subtitle.TextTruncate = Enum.TextTruncate.SplitWord
@@ -526,12 +808,12 @@ function MacLib:Window(Settings)
 	local displayName = Instance.new("TextLabel")
 	displayName.Name = "DisplayName"
 	displayName.FontFace = Font.new(
-		assets.interFont,
+		Assets.InterFont,
 		Enum.FontWeight.SemiBold,
 		Enum.FontStyle.Normal
 	)
 	displayName.Text = LocalPlayer.DisplayName
-	displayName.TextColor3 = Color3.fromRGB(255, 255, 255)
+	RegisterThemed(displayName, "TextColor3", "Text")
 	displayName.TextSize = 13
 	displayName.TextTransparency = 0.1
 	displayName.TextTruncate = Enum.TextTruncate.SplitWord
@@ -560,12 +842,12 @@ function MacLib:Window(Settings)
 	local username = Instance.new("TextLabel")
 	username.Name = "Username"
 	username.FontFace = Font.new(
-		assets.interFont,
+		Assets.InterFont,
 		Enum.FontWeight.SemiBold,
 		Enum.FontStyle.Normal
 	)
 	username.Text = "@" .. LocalPlayer.Name
-	username.TextColor3 = Color3.fromRGB(255, 255, 255)
+	RegisterThemed(username, "TextColor3", "Text")
 	username.TextSize = 12
 	username.TextTransparency = 0.7
 	username.TextTruncate = Enum.TextTruncate.SplitWord
@@ -599,42 +881,42 @@ function MacLib:Window(Settings)
 	sidebarGroupUIPadding.PaddingTop = UDim.new(0, 31)
 	sidebarGroupUIPadding.Parent = sidebarGroup
 
-	local tabSwitchers = Instance.new("Frame")
-	tabSwitchers.Name = "TabSwitchers"
-	tabSwitchers.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	tabSwitchers.BackgroundTransparency = 1
-	tabSwitchers.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	tabSwitchers.BorderSizePixel = 0
-	tabSwitchers.Size = UDim2.new(1, 0, 1, -107)
+	local Tabswitchers = Instance.new("Frame")
+	Tabswitchers.Name = "Tabswitchers"
+	Tabswitchers.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Tabswitchers.BackgroundTransparency = 1
+	Tabswitchers.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	Tabswitchers.BorderSizePixel = 0
+	Tabswitchers.Size = UDim2.new(1, 0, 1, -107)
 
-	local tabSwitchersScrollingFrame = Instance.new("ScrollingFrame")
-	tabSwitchersScrollingFrame.Name = "TabSwitchersScrollingFrame"
-	tabSwitchersScrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	tabSwitchersScrollingFrame.BottomImage = ""
-	tabSwitchersScrollingFrame.CanvasSize = UDim2.new()
-	tabSwitchersScrollingFrame.ScrollBarImageTransparency = 0.8
-	tabSwitchersScrollingFrame.ScrollBarThickness = 1
-	tabSwitchersScrollingFrame.TopImage = ""
-	tabSwitchersScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	tabSwitchersScrollingFrame.BackgroundTransparency = 1
-	tabSwitchersScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	tabSwitchersScrollingFrame.BorderSizePixel = 0
-	tabSwitchersScrollingFrame.Size = UDim2.fromScale(1, 1)
+	local TabswitchersScrollingFrame = Instance.new("ScrollingFrame")
+	TabswitchersScrollingFrame.Name = "TabswitchersScrollingFrame"
+	TabswitchersScrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	TabswitchersScrollingFrame.BottomImage = ""
+	TabswitchersScrollingFrame.CanvasSize = UDim2.new()
+	TabswitchersScrollingFrame.ScrollBarImageTransparency = 0.8
+	TabswitchersScrollingFrame.ScrollBarThickness = 1
+	TabswitchersScrollingFrame.TopImage = ""
+	TabswitchersScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	TabswitchersScrollingFrame.BackgroundTransparency = 1
+	TabswitchersScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	TabswitchersScrollingFrame.BorderSizePixel = 0
+	TabswitchersScrollingFrame.Size = UDim2.fromScale(1, 1)
 
-	local tabSwitchersScrollingFrameUIListLayout = Instance.new("UIListLayout")
-	tabSwitchersScrollingFrameUIListLayout.Name = "TabSwitchersScrollingFrameUIListLayout"
-	tabSwitchersScrollingFrameUIListLayout.Padding = UDim.new(0, 17)
-	tabSwitchersScrollingFrameUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	tabSwitchersScrollingFrameUIListLayout.Parent = tabSwitchersScrollingFrame
+	local TabswitchersScrollingFrameUIListLayout = Instance.new("UIListLayout")
+	TabswitchersScrollingFrameUIListLayout.Name = "TabswitchersScrollingFrameUIListLayout"
+	TabswitchersScrollingFrameUIListLayout.Padding = UDim.new(0, 17)
+	TabswitchersScrollingFrameUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	TabswitchersScrollingFrameUIListLayout.Parent = TabswitchersScrollingFrame
 
-	local tabSwitchersScrollingFrameUIPadding = Instance.new("UIPadding")
-	tabSwitchersScrollingFrameUIPadding.Name = "TabSwitchersScrollingFrameUIPadding"
-	tabSwitchersScrollingFrameUIPadding.PaddingTop = UDim.new(0, 2)
-	tabSwitchersScrollingFrameUIPadding.Parent = tabSwitchersScrollingFrame
+	local TabswitchersScrollingFrameUIPadding = Instance.new("UIPadding")
+	TabswitchersScrollingFrameUIPadding.Name = "TabswitchersScrollingFrameUIPadding"
+	TabswitchersScrollingFrameUIPadding.PaddingTop = UDim.new(0, 2)
+	TabswitchersScrollingFrameUIPadding.Parent = TabswitchersScrollingFrame
 
-	tabSwitchersScrollingFrame.Parent = tabSwitchers
+	TabswitchersScrollingFrame.Parent = Tabswitchers
 
-	tabSwitchers.Parent = sidebarGroup
+	Tabswitchers.Parent = sidebarGroup
 
 	sidebarGroup.Parent = sidebar
 
@@ -740,8 +1022,9 @@ function MacLib:Window(Settings)
 
 	local moveIcon = Instance.new("ImageButton")
 	moveIcon.Name = "MoveIcon"
-	moveIcon.Image = assets.transform
+	moveIcon.Image = Assets.Transform
 	moveIcon.ImageTransparency = 0.7
+	RegisterThemed(moveIcon, "ImageColor3", "Dragger")
 	moveIcon.AnchorPoint = Vector2.new(1, 0.5)
 	moveIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	moveIcon.BackgroundTransparency = 1
@@ -860,11 +1143,11 @@ function MacLib:Window(Settings)
 
 	local currentTab = Instance.new("TextLabel")
 	currentTab.Name = "CurrentTab"
-	currentTab.FontFace = Font.new(assets.interFont)
+	currentTab.FontFace = Font.new(Assets.InterFont)
 	currentTab.RichText = true
 	currentTab.Text = ""
 	currentTab.RichText = true
-	currentTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+	RegisterThemed(currentTab, "TextColor3", "Text")
 	currentTab.TextSize = 15
 	currentTab.TextTransparency = 0.5
 	currentTab.TextTruncate = Enum.TextTruncate.SplitWord
@@ -889,7 +1172,7 @@ function MacLib:Window(Settings)
 	local globalSettings = Instance.new("Frame")
 	globalSettings.Name = "GlobalSettings"
 	globalSettings.AutomaticSize = Enum.AutomaticSize.XY
-	globalSettings.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+	RegisterThemed(globalSettings, "BackgroundColor3", "Core")
 	globalSettings.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	globalSettings.BorderSizePixel = 0
 	globalSettings.Position = UDim2.fromScale(0.298, 0.104)
@@ -923,7 +1206,7 @@ function MacLib:Window(Settings)
 	globalSettingsUIScale.Scale = 1e-07
 	globalSettingsUIScale.Parent = globalSettings
 	globalSettings.Parent = base
-	base.Parent = macLib
+	base.Parent = calamari
 
 	function WindowFunctions:UpdateTitle(NewTitle)
 		title.Text = NewTitle
@@ -953,7 +1236,7 @@ function MacLib:Window(Settings)
 		end
 	end
 	globalSettingsButton.MouseButton1Click:Connect(function()
-		if not hasGlobalSetting then return end
+		if not HasGlobalSetting then return end
 		toggle()
 	end)
 	globalSettings.MouseEnter:Connect(function()
@@ -1135,7 +1418,7 @@ function MacLib:Window(Settings)
 	end
 
 	local function UpdateOrientation(fetchProps)
-		if not IsVisible(frame) or not acrylicBlur or unloaded then
+		if not IsVisible(frame) or not AcrylicBlur or Unloaded then
 			for _, pt in pairs(parts) do
 				pt.Parent = nil
 				DepthOfField.Enabled = false
@@ -1194,7 +1477,7 @@ function MacLib:Window(Settings)
 	RunService.RenderStepped:Connect(UpdateOrientation)
 
 	function WindowFunctions:GlobalSetting(Settings)
-		hasGlobalSetting = true
+		HasGlobalSetting = true
 		local GlobalSettingFunctions = {}
 		local globalSetting = Instance.new("TextButton")
 		globalSetting.Name = "GlobalSetting"
@@ -1215,10 +1498,10 @@ function MacLib:Window(Settings)
 
 		local settingName = Instance.new("TextLabel")
 		settingName.Name = "SettingName"
-		settingName.FontFace = Font.new(assets.interFont)
+		settingName.FontFace = Font.new(Assets.InterFont)
 		settingName.Text = Settings.Name
 		settingName.RichText = true
-		settingName.TextColor3 = Color3.fromRGB(255, 255, 255)
+		RegisterThemed(settingName, "TextColor3", "Text")
 		settingName.TextSize = 13
 		settingName.TextTransparency = 0.5
 		settingName.TextTruncate = Enum.TextTruncate.SplitWord
@@ -1245,12 +1528,12 @@ function MacLib:Window(Settings)
 		local checkmark = Instance.new("TextLabel")
 		checkmark.Name = "Checkmark"
 		checkmark.FontFace = Font.new(
-			assets.interFont,
+			Assets.InterFont,
 			Enum.FontWeight.Medium,
 			Enum.FontStyle.Normal
 		)
 		checkmark.Text = "✓"
-		checkmark.TextColor3 = Color3.fromRGB(255, 255, 255)
+		RegisterThemed(checkmark, "TextColor3", "Text")
 		checkmark.TextSize = 13
 		checkmark.TextTransparency = 1
 		checkmark.TextXAlignment = Enum.TextXAlignment.Left
@@ -1354,7 +1637,7 @@ function MacLib:Window(Settings)
 		local divider3 = Instance.new("Frame")
 		divider3.Name = "Divider"
 		divider3.AnchorPoint = Vector2.new(0.5, 1)
-		divider3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		RegisterThemed(divider3, "BackgroundColor3", "Divider")
 		divider3.BackgroundTransparency = 0.9
 		divider3.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		divider3.BorderSizePixel = 0
@@ -1362,67 +1645,67 @@ function MacLib:Window(Settings)
 		divider3.Size = UDim2.new(1, -21, 0, 1)
 		divider3.Parent = tabGroup
 
-		local sectionTabSwitchers = Instance.new("Frame")
-		sectionTabSwitchers.Name = "SectionTabSwitchers"
-		sectionTabSwitchers.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		sectionTabSwitchers.BackgroundTransparency = 1
-		sectionTabSwitchers.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		sectionTabSwitchers.BorderSizePixel = 0
-		sectionTabSwitchers.Size = UDim2.fromScale(1, 1)
+		local sectionTabswitchers = Instance.new("Frame")
+		sectionTabswitchers.Name = "SectionTabswitchers"
+		sectionTabswitchers.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		sectionTabswitchers.BackgroundTransparency = 1
+		sectionTabswitchers.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		sectionTabswitchers.BorderSizePixel = 0
+		sectionTabswitchers.Size = UDim2.fromScale(1, 1)
 
 		local uIListLayout1 = Instance.new("UIListLayout")
 		uIListLayout1.Name = "UIListLayout"
 		uIListLayout1.Padding = UDim.new(0, 15)
 		uIListLayout1.HorizontalAlignment = Enum.HorizontalAlignment.Center
 		uIListLayout1.SortOrder = Enum.SortOrder.LayoutOrder
-		uIListLayout1.Parent = sectionTabSwitchers
+		uIListLayout1.Parent = sectionTabswitchers
 
 		local uIPadding1 = Instance.new("UIPadding")
 		uIPadding1.Name = "UIPadding"
 		uIPadding1.PaddingBottom = UDim.new(0, 15)
-		uIPadding1.Parent = sectionTabSwitchers
+		uIPadding1.Parent = sectionTabswitchers
 
-		sectionTabSwitchers.Parent = tabGroup
-		tabGroup.Parent = tabSwitchersScrollingFrame
+		sectionTabswitchers.Parent = tabGroup
+		tabGroup.Parent = TabswitchersScrollingFrame
 
 		function SectionFunctions:Tab(Settings)
 			local TabFunctions = {Settings = Settings}
-			local tabSwitcher = Instance.new("TextButton")
-			tabSwitcher.Name = "TabSwitcher"
-			tabSwitcher.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json")
-			tabSwitcher.Text = ""
-			tabSwitcher.TextColor3 = Color3.fromRGB(0, 0, 0)
-			tabSwitcher.TextSize = 14
-			tabSwitcher.AutoButtonColor = false
-			tabSwitcher.AnchorPoint = Vector2.new(0.5, 0)
-			tabSwitcher.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			tabSwitcher.BackgroundTransparency = 1
-			tabSwitcher.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			tabSwitcher.BorderSizePixel = 0
-			tabSwitcher.Position = UDim2.fromScale(0.5, 0)
-			tabSwitcher.Size = UDim2.new(1, -21, 0, 40)
+			local Tabswitcher = Instance.new("TextButton")
+			Tabswitcher.Name = "Tabswitcher"
+			Tabswitcher.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json")
+			Tabswitcher.Text = ""
+			Tabswitcher.TextColor3 = Color3.fromRGB(0, 0, 0)
+			Tabswitcher.TextSize = 14
+			Tabswitcher.AutoButtonColor = false
+			Tabswitcher.AnchorPoint = Vector2.new(0.5, 0)
+			Tabswitcher.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			Tabswitcher.BackgroundTransparency = 1
+			Tabswitcher.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Tabswitcher.BorderSizePixel = 0
+			Tabswitcher.Position = UDim2.fromScale(0.5, 0)
+			Tabswitcher.Size = UDim2.new(1, -21, 0, 40)
 
-			tabIndex += 1
-			tabSwitcher.LayoutOrder = tabIndex
+			TabIndex += 1
+			Tabswitcher.LayoutOrder = TabIndex
 
-			local tabSwitcherUICorner = Instance.new("UICorner")
-			tabSwitcherUICorner.Name = "TabSwitcherUICorner"
-			tabSwitcherUICorner.Parent = tabSwitcher
+			local TabswitcherUICorner = Instance.new("UICorner")
+			TabswitcherUICorner.Name = "TabswitcherUICorner"
+			TabswitcherUICorner.Parent = Tabswitcher
 
-			local tabSwitcherUIStroke = Instance.new("UIStroke")
-			tabSwitcherUIStroke.Name = "TabSwitcherUIStroke"
-			tabSwitcherUIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-			tabSwitcherUIStroke.Color = Color3.fromRGB(255, 255, 255)
-			tabSwitcherUIStroke.Transparency = 1
-			tabSwitcherUIStroke.Parent = tabSwitcher
+			local TabswitcherUIStroke = Instance.new("UIStroke")
+			TabswitcherUIStroke.Name = "TabswitcherUIStroke"
+			TabswitcherUIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			TabswitcherUIStroke.Color = Color3.fromRGB(255, 255, 255)
+			TabswitcherUIStroke.Transparency = 1
+			TabswitcherUIStroke.Parent = Tabswitcher
 
-			local tabSwitcherUIListLayout = Instance.new("UIListLayout")
-			tabSwitcherUIListLayout.Name = "TabSwitcherUIListLayout"
-			tabSwitcherUIListLayout.Padding = UDim.new(0, 9)
-			tabSwitcherUIListLayout.FillDirection = Enum.FillDirection.Horizontal
-			tabSwitcherUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-			tabSwitcherUIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-			tabSwitcherUIListLayout.Parent = tabSwitcher
+			local TabswitcherUIListLayout = Instance.new("UIListLayout")
+			TabswitcherUIListLayout.Name = "TabswitcherUIListLayout"
+			TabswitcherUIListLayout.Padding = UDim.new(0, 9)
+			TabswitcherUIListLayout.FillDirection = Enum.FillDirection.Horizontal
+			TabswitcherUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+			TabswitcherUIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+			TabswitcherUIListLayout.Parent = Tabswitcher
 
 			local tabImage
 
@@ -1430,47 +1713,48 @@ function MacLib:Window(Settings)
 				tabImage = Instance.new("ImageLabel")
 				tabImage.Name = "TabImage"
 				tabImage.Image = Settings.Image
+				RegisterThemed(tabImage, "ImageColor3", "TabImage")
 				tabImage.ImageTransparency = 0.5
 				tabImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 				tabImage.BackgroundTransparency = 1
 				tabImage.BorderColor3 = Color3.fromRGB(0, 0, 0)
 				tabImage.BorderSizePixel = 0
 				tabImage.Size = UDim2.fromOffset(18, 18)
-				tabImage.Parent = tabSwitcher
+				tabImage.Parent = Tabswitcher
 			end
 
-			local tabSwitcherName = Instance.new("TextLabel")
-			tabSwitcherName.Name = "TabSwitcherName"
-			tabSwitcherName.FontFace = Font.new(
-				assets.interFont,
+			local TabswitcherName = Instance.new("TextLabel")
+			TabswitcherName.Name = "TabswitcherName"
+			TabswitcherName.FontFace = Font.new(
+				Assets.InterFont,
 				Enum.FontWeight.Medium,
 				Enum.FontStyle.Normal
 			)
-			tabSwitcherName.Text = Settings.Name
-			tabSwitcherName.RichText = true
-			tabSwitcherName.TextColor3 = Color3.fromRGB(255, 255, 255)
-			tabSwitcherName.TextSize = 16
-			tabSwitcherName.TextTransparency = 0.5
-			tabSwitcherName.TextTruncate = Enum.TextTruncate.SplitWord
-			tabSwitcherName.TextXAlignment = Enum.TextXAlignment.Left
-			tabSwitcherName.TextYAlignment = Enum.TextYAlignment.Top
-			tabSwitcherName.AutomaticSize = Enum.AutomaticSize.Y
-			tabSwitcherName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			tabSwitcherName.BackgroundTransparency = 1
-			tabSwitcherName.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			tabSwitcherName.BorderSizePixel = 0
-			tabSwitcherName.Size = UDim2.fromScale(1, 0)
-			tabSwitcherName.Parent = tabSwitcher
-			tabSwitcherName.LayoutOrder = 1
+			TabswitcherName.Text = Settings.Name
+			TabswitcherName.RichText = true
+			RegisterThemed(TabswitcherName, "TextColor3", "TabName")
+			TabswitcherName.TextSize = 16
+			TabswitcherName.TextTransparency = 0.5
+			TabswitcherName.TextTruncate = Enum.TextTruncate.SplitWord
+			TabswitcherName.TextXAlignment = Enum.TextXAlignment.Left
+			TabswitcherName.TextYAlignment = Enum.TextYAlignment.Top
+			TabswitcherName.AutomaticSize = Enum.AutomaticSize.Y
+			TabswitcherName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			TabswitcherName.BackgroundTransparency = 1
+			TabswitcherName.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			TabswitcherName.BorderSizePixel = 0
+			TabswitcherName.Size = UDim2.fromScale(1, 0)
+			TabswitcherName.Parent = Tabswitcher
+			TabswitcherName.LayoutOrder = 1
 
-			local tabSwitcherUIPadding = Instance.new("UIPadding")
-			tabSwitcherUIPadding.Name = "TabSwitcherUIPadding"
-			tabSwitcherUIPadding.PaddingLeft = UDim.new(0, 24)
-			tabSwitcherUIPadding.PaddingRight = UDim.new(0, 35)
-			tabSwitcherUIPadding.PaddingTop = UDim.new(0, 1)
-			tabSwitcherUIPadding.Parent = tabSwitcher
+			local TabswitcherUIPadding = Instance.new("UIPadding")
+			TabswitcherUIPadding.Name = "TabswitcherUIPadding"
+			TabswitcherUIPadding.PaddingLeft = UDim.new(0, 24)
+			TabswitcherUIPadding.PaddingRight = UDim.new(0, 35)
+			TabswitcherUIPadding.PaddingTop = UDim.new(0, 1)
+			TabswitcherUIPadding.Parent = Tabswitcher
 
-			tabSwitcher.Parent = sectionTabSwitchers
+			Tabswitcher.Parent = sectionTabswitchers
 
 			local elements1 = Instance.new("Frame")
 			elements1.Name = "Elements"
@@ -1611,9 +1895,9 @@ function MacLib:Window(Settings)
 
 					local buttonInteract = Instance.new("TextButton")
 					buttonInteract.Name = "ButtonInteract"
-					buttonInteract.FontFace = Font.new(assets.interFont)
+					buttonInteract.FontFace = Font.new(Assets.InterFont)
 					buttonInteract.RichText = true
-					buttonInteract.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(buttonInteract, "TextColor3", "Text")
 					buttonInteract.TextSize = 13
 					buttonInteract.TextTransparency = 0.5
 					buttonInteract.TextTruncate = Enum.TextTruncate.AtEnd
@@ -1626,18 +1910,19 @@ function MacLib:Window(Settings)
 					buttonInteract.Parent = button
 					buttonInteract.Text = ButtonFunctions.Settings.Name
 
-					local buttonImage = Instance.new("ImageLabel")
-					buttonImage.Name = "ButtonImage"
-					buttonImage.Image = assets.buttonImage
-					buttonImage.ImageTransparency = 0.5
-					buttonImage.AnchorPoint = Vector2.new(1, 0.5)
-					buttonImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-					buttonImage.BackgroundTransparency = 1
-					buttonImage.BorderColor3 = Color3.fromRGB(0, 0, 0)
-					buttonImage.BorderSizePixel = 0
-					buttonImage.Position = UDim2.fromScale(1, 0.5)
-					buttonImage.Size = UDim2.fromOffset(15, 15)
-					buttonImage.Parent = button
+					local ButtonImage = Instance.new("ImageLabel")
+					ButtonImage.Name = "ButtonImage"
+					ButtonImage.Image = Assets.ButtonImage
+					ButtonImage.ImageTransparency = 0.5
+					RegisterThemed(ButtonImage, "ImageColor3", "DropdownIndicator")
+					ButtonImage.AnchorPoint = Vector2.new(1, 0.5)
+					ButtonImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					ButtonImage.BackgroundTransparency = 1
+					ButtonImage.BorderColor3 = Color3.fromRGB(0, 0, 0)
+					ButtonImage.BorderSizePixel = 0
+					ButtonImage.Position = UDim2.fromScale(1, 0.5)
+					ButtonImage.Size = UDim2.fromOffset(15, 15)
+					ButtonImage.Parent = button
 
 					local TweenSettings = {
 						DefaultTransparency = 0.5,
@@ -1651,14 +1936,14 @@ function MacLib:Window(Settings)
 							Tween(buttonInteract, TweenInfo.new(0.2, TweenSettings.EasingStyle), {
 								TextTransparency = TweenSettings.DefaultTransparency
 							}):Play()
-							Tween(buttonImage, TweenInfo.new(0.2, TweenSettings.EasingStyle), {
+							Tween(ButtonImage, TweenInfo.new(0.2, TweenSettings.EasingStyle), {
 								ImageTransparency = TweenSettings.DefaultTransparency
 							}):Play()
 						elseif State == "Hover" then
 							Tween(buttonInteract, TweenInfo.new(0.2, TweenSettings.EasingStyle), {
 								TextTransparency = TweenSettings.HoverTransparency
 							}):Play()
-							Tween(buttonImage, TweenInfo.new(0.2, TweenSettings.EasingStyle), {
+							Tween(ButtonImage, TweenInfo.new(0.2, TweenSettings.EasingStyle), {
 								ImageTransparency = TweenSettings.HoverTransparency
 							}):Play()
 						end
@@ -1686,7 +1971,7 @@ function MacLib:Window(Settings)
 					end
 
 					if Flag then
-						MacLib.Options[Flag] = ButtonFunctions
+						Calamari.Options[Flag] = ButtonFunctions
 					end
 					return ButtonFunctions
 				end
@@ -1705,10 +1990,10 @@ function MacLib:Window(Settings)
 
 					local toggleName = Instance.new("TextLabel")
 					toggleName.Name = "ToggleName"
-					toggleName.FontFace = Font.new(assets.interFont)
+					toggleName.FontFace = Font.new(Assets.InterFont)
 					toggleName.Text = ToggleFunctions.Settings.Name
 					toggleName.RichText = true
-					toggleName.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(toggleName, "TextColor3", "Text")
 					toggleName.TextSize = 13
 					toggleName.TextTransparency = 0.5
 					toggleName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -1726,7 +2011,7 @@ function MacLib:Window(Settings)
 
 					local toggle1 = Instance.new("ImageButton")
 					toggle1.Name = "Toggle"
-					toggle1.Image = assets.toggleBackground
+					toggle1.Image = Assets.ToggleBackground
 					toggle1.ImageColor3 = Color3.fromRGB(87, 86, 86)
 					toggle1.AutoButtonColor = false
 					toggle1.AnchorPoint = Vector2.new(1, 0.5)
@@ -1746,25 +2031,29 @@ function MacLib:Window(Settings)
 					toggleUIPadding.PaddingTop = UDim.new(0, 1)
 					toggleUIPadding.Parent = toggle1
 
-					local togglerHead = Instance.new("ImageLabel")
-					togglerHead.Name = "TogglerHead"
-					togglerHead.Image = assets.togglerHead
-					togglerHead.ImageColor3 = Color3.fromRGB(255, 255, 255)
-					togglerHead.AnchorPoint = Vector2.new(1, 0.5)
-					togglerHead.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-					togglerHead.BackgroundTransparency = 1
-					togglerHead.BorderColor3 = Color3.fromRGB(0, 0, 0)
-					togglerHead.BorderSizePixel = 0
-					togglerHead.Position = UDim2.fromScale(0.5, 0.5)
-					togglerHead.Size = UDim2.fromOffset(15, 15)
-					togglerHead.ZIndex = 2
-					togglerHead.Parent = toggle1
-					togglerHead.ImageTransparency = 0.8
+					local TogglerHead = Instance.new("ImageLabel")
+					TogglerHead.Name = "TogglerHead"
+					TogglerHead.Image = Assets.TogglerHead
+					TogglerHead.ImageColor3 = Color3.fromRGB(255, 255, 255)
+					TogglerHead.AnchorPoint = Vector2.new(1, 0.5)
+					TogglerHead.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					TogglerHead.BackgroundTransparency = 1
+					TogglerHead.BorderColor3 = Color3.fromRGB(0, 0, 0)
+					TogglerHead.BorderSizePixel = 0
+					TogglerHead.Position = UDim2.fromScale(0.5, 0.5)
+					TogglerHead.Size = UDim2.fromOffset(15, 15)
+					TogglerHead.ZIndex = 2
+					TogglerHead.Parent = toggle1
+					TogglerHead.ImageTransparency = 0.8
 
 					toggle1.Parent = toggle
 
 					local toggle1Transparency = {Enabled = 0, Disabled = 0.5}
-					local togglerHeadTransparency = {Enabled = 0, Disabled = 0.85}
+					local TogglerHeadTransparency = {Enabled = 0, Disabled = 0.85}
+					local TogglerHeadColor = {
+						Enabled = Themes[CurrentTheme].Toggle,
+						Disabled = Color3.fromRGB(255,255,255)
+					}
 
 					local TweenSettings = {
 						Info = TweenInfo.new(0.15, Enum.EasingStyle.Quad),
@@ -1776,20 +2065,23 @@ function MacLib:Window(Settings)
 					local togglebool = ToggleFunctions.Settings.Default
 
 					local function NewState(State, callback)
-						local transparencyValues = State and {toggle1Transparency.Enabled, togglerHeadTransparency.Enabled}
-							or {toggle1Transparency.Disabled, togglerHeadTransparency.Disabled}
+						local transparencyValues = State and {toggle1Transparency.Enabled, TogglerHeadTransparency.Enabled}
+							or {toggle1Transparency.Disabled, TogglerHeadTransparency.Disabled}
+
 						local position = State and TweenSettings.EnabledPosition or TweenSettings.DisabledPosition
+						local color = State and TogglerHeadColor.Enabled or TogglerHeadColor.Disabled
 
 						Tween(toggle1, TweenSettings.Info, {
 							ImageTransparency = transparencyValues[1]
 						}):Play()
 
-						Tween(togglerHead, TweenSettings.Info, {
+						Tween(TogglerHead, TweenSettings.Info, {
 							ImageTransparency = transparencyValues[2]
 						}):Play()
 
-						Tween(togglerHead, TweenSettings.Info, {
-							Position = position
+						Tween(TogglerHead, TweenSettings.Info, {
+							Position = position,
+							ImageColor3 = color
 						}):Play()
 
 						ToggleFunctions.State = State
@@ -1797,6 +2089,12 @@ function MacLib:Window(Settings)
 							callback(togglebool)
 						end
 					end
+
+					RegisterThemeCallback(function()
+						TogglerHeadColor.Enabled = Themes[CurrentTheme].Toggle
+
+						NewState(ToggleFunctions.State)
+					end)
 
 					NewState(togglebool)
 
@@ -1825,7 +2123,7 @@ function MacLib:Window(Settings)
 					end
 
 					if Flag then
-						MacLib.Options[Flag] = ToggleFunctions
+						Calamari.Options[Flag] = ToggleFunctions
 					end
 					return ToggleFunctions
 				end
@@ -1844,10 +2142,10 @@ function MacLib:Window(Settings)
 
 					local sliderName = Instance.new("TextLabel")
 					sliderName.Name = "SliderName"
-					sliderName.FontFace = Font.new(assets.interFont)
+					sliderName.FontFace = Font.new(Assets.InterFont)
 					sliderName.Text = SliderFunctions.Settings.Name
 					sliderName.RichText = true
-					sliderName.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(sliderName, "TextColor3", "Text")
 					sliderName.TextSize = 13
 					sliderName.TextTransparency = 0.5
 					sliderName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -1874,8 +2172,8 @@ function MacLib:Window(Settings)
 
 					local sliderValue = Instance.new("TextBox")
 					sliderValue.Name = "SliderValue"
-					sliderValue.FontFace = Font.new(assets.interFont)
-					sliderValue.TextColor3 = Color3.fromRGB(255, 255, 255)
+					sliderValue.FontFace = Font.new(Assets.InterFont)
+					RegisterThemed(sliderValue, "TextColor3", "Text")
 					sliderValue.TextSize = 12
 					sliderValue.TextTransparency = 0.1
 					--sliderValue.TextTruncate = Enum.TextTruncate.AtEnd
@@ -1919,7 +2217,7 @@ function MacLib:Window(Settings)
 
 					local sliderBar = Instance.new("ImageLabel")
 					sliderBar.Name = "SliderBar"
-					sliderBar.Image = assets.sliderbar
+					sliderBar.Image = Assets.Sliderbar
 					sliderBar.ImageColor3 = Color3.fromRGB(87, 86, 86)
 					sliderBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 					sliderBar.BackgroundTransparency = 1
@@ -1930,9 +2228,10 @@ function MacLib:Window(Settings)
 
 					local sliderHead = Instance.new("ImageButton")
 					sliderHead.Name = "SliderHead"
-					sliderHead.Image = assets.sliderhead
+					sliderHead.Image = Assets.Sliderhead
 					sliderHead.AnchorPoint = Vector2.new(0.5, 0.5)
 					sliderHead.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(sliderHead, "ImageColor3", "Slider")
 					sliderHead.BackgroundTransparency = 1
 					sliderHead.BorderColor3 = Color3.fromRGB(0, 0, 0)
 					sliderHead.BorderSizePixel = 0
@@ -1952,10 +2251,10 @@ function MacLib:Window(Settings)
 					local dragging = false
 
 					local DisplayMethods = {
-						Hundredths = function(sliderValue) -- Deprecated use Settings.Precision
+						Hundredths = function(sliderValue)
 							return string.format("%.2f", sliderValue)
 						end,
-						Tenths = function(sliderValue) -- Deprecated use Settings.Precision
+						Tenths = function(sliderValue)
 							return string.format("%.1f", sliderValue)
 						end,
 						Round = function(sliderValue, precision)
@@ -2086,7 +2385,7 @@ function MacLib:Window(Settings)
 					end
 
 					if Flag then
-						MacLib.Options[Flag] = SliderFunctions
+						Calamari.Options[Flag] = SliderFunctions
 					end
 					return SliderFunctions
 				end
@@ -2105,10 +2404,10 @@ function MacLib:Window(Settings)
 
 					local inputName = Instance.new("TextLabel")
 					inputName.Name = "InputName"
-					inputName.FontFace = Font.new(assets.interFont)
+					inputName.FontFace = Font.new(Assets.InterFont)
 					inputName.Text = InputFunctions.Settings.Name
 					inputName.RichText = true
-					inputName.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(inputName, "TextColor3", "Text")
 					inputName.TextSize = 13
 					inputName.TextTransparency = 0.5
 					inputName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -2125,9 +2424,10 @@ function MacLib:Window(Settings)
 
 					local inputBox = Instance.new("TextBox")
 					inputBox.Name = "InputBox"
-					inputBox.FontFace = Font.new(assets.interFont)
+					inputBox.FontFace = Font.new(Assets.InterFont)
 					inputBox.Text = "Hello world!"
-					inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(inputBox, "TextColor3", "Text")
+					RegisterThemed(inputBox, "PlaceholderColor3", "Placeholder")
 					inputBox.TextSize = 12
 					inputBox.TextTransparency = 0.1
 					inputBox.AnchorPoint = Vector2.new(1, 0.5)
@@ -2262,13 +2562,20 @@ function MacLib:Window(Settings)
 					end
 
 					if Flag then
-						MacLib.Options[Flag] = InputFunctions
+						Calamari.Options[Flag] = InputFunctions
 					end
 					return InputFunctions
 				end
 
+
 				function SectionFunctions:Keybind(Settings, Flag)
-					local KeybindFunctions = { Settings = Settings, IgnoreConfig = false, Class = "Keybind" }
+					local KeybindFunctions = {
+						Settings = Settings,
+						IgnoreConfig = false,
+						Class = "Keybind",
+						Connections = {}
+					}
+
 					local keybind = Instance.new("Frame")
 					keybind.Name = "Keybind"
 					keybind.AutomaticSize = Enum.AutomaticSize.Y
@@ -2281,10 +2588,10 @@ function MacLib:Window(Settings)
 
 					local keybindName = Instance.new("TextLabel")
 					keybindName.Name = "KeybindName"
-					keybindName.FontFace = Font.new(assets.interFont)
+					keybindName.FontFace = Font.new(Assets.InterFont)
 					keybindName.Text = KeybindFunctions.Settings.Name
 					keybindName.RichText = true
-					keybindName.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(keybindName, "TextColor3", "Text")
 					keybindName.TextSize = 13
 					keybindName.TextTransparency = 0.5
 					keybindName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -2302,7 +2609,7 @@ function MacLib:Window(Settings)
 					local binderBox = Instance.new("TextBox")
 					binderBox.Name = "BinderBox"
 					binderBox.CursorPosition = -1
-					binderBox.FontFace = Font.new(assets.interFont)
+					binderBox.FontFace = Font.new(Assets.InterFont)
 					binderBox.PlaceholderText = "..."
 					binderBox.Text = ""
 					binderBox.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -2343,10 +2650,12 @@ function MacLib:Window(Settings)
 
 					binderBox.Parent = keybind
 
-					local focused
+					local focused = false
 					local isBinding = false
 					local reset = false
 					local binded = KeybindFunctions.Settings.Default
+					local bindingEvent = nil
+
 					KeybindFunctions.Binded = binded
 
 					local function resetFocusState()
@@ -2359,24 +2668,28 @@ function MacLib:Window(Settings)
 						binderBox.Text = binded.Name
 					end
 
-					binderBox.Focused:Connect(function()
+					table.insert(KeybindFunctions.Connections, binderBox.Focused:Connect(function()
 						focused = true
-					end)
+					end))
 
-					binderBox.FocusLost:Connect(function()
+					table.insert(KeybindFunctions.Connections, binderBox.FocusLost:Connect(function()
 						focused = false
-					end)
+					end))
 
-					UserInputService.InputBegan:Connect(function(inp, processed)
+					table.insert(KeybindFunctions.Connections, UserInputService.InputBegan:Connect(function(inp, processed)
 						if focused and not isBinding then
 							isBinding = true
 
-							local Event
-							Event = UserInputService.InputBegan:Connect(function(input)
-								if KeybindFunctions.Settings.Blacklist and (table.find(KeybindFunctions.KeybindFunctions.Settings.Blacklist, input.KeyCode) or table.find(KeybindFunctions.Settings.Blacklist, input.UserInputType)) then
-									binderBox:ReleaseFocus()
+							bindingEvent = UserInputService.InputBegan:Connect(function(input)
+								if KeybindFunctions.Destroyed then return end
+
+								if KeybindFunctions.Settings.Blacklist and (
+									table.find(KeybindFunctions.Settings.Blacklist, input.KeyCode)
+										or table.find(KeybindFunctions.Settings.Blacklist, input.UserInputType)
+									) then
 									resetFocusState()
-									Event:Disconnect()
+									bindingEvent:Disconnect()
+									bindingEvent = nil
 									return
 								end
 
@@ -2384,7 +2697,8 @@ function MacLib:Window(Settings)
 									binded = input.KeyCode
 									KeybindFunctions.Binded = binded
 									binderBox.Text = input.KeyCode.Name
-								elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.MouseButton2 then
+								elseif input.UserInputType == Enum.UserInputType.MouseButton1
+									or input.UserInputType == Enum.UserInputType.MouseButton2 then
 									binded = input.UserInputType
 									KeybindFunctions.Binded = binded
 									binderBox.Text = input.UserInputType.Name
@@ -2393,10 +2707,15 @@ function MacLib:Window(Settings)
 								if KeybindFunctions.Settings.onBinded then
 									KeybindFunctions.Settings.onBinded(binded)
 								end
+
 								reset = true
 								resetFocusState()
-								Event:Disconnect()
+
+								bindingEvent:Disconnect()
+								bindingEvent = nil
 							end)
+
+							table.insert(KeybindFunctions.Connections, bindingEvent)
 						else
 							if processed then return end
 
@@ -2404,6 +2723,7 @@ function MacLib:Window(Settings)
 								if KeybindFunctions.Settings.Callback then
 									KeybindFunctions.Settings.Callback(binded)
 								end
+
 								if KeybindFunctions.Settings.onBindHeld then
 									KeybindFunctions.Settings.onBindHeld(true, binded)
 								end
@@ -2411,9 +2731,11 @@ function MacLib:Window(Settings)
 								reset = false
 							end
 						end
-					end)
+					end))
 
-					UserInputService.InputEnded:Connect(function(inp)
+					table.insert(KeybindFunctions.Connections, UserInputService.InputEnded:Connect(function(inp)
+						if KeybindFunctions.Destroyed then return end
+
 						if not focused and not isBinding then
 							if inp.KeyCode == binded or inp.UserInputType == binded then
 								if Settings.onBindHeld then
@@ -2421,7 +2743,7 @@ function MacLib:Window(Settings)
 								end
 							end
 						end
-					end)
+					end))
 
 					function KeybindFunctions:Bind(Key)
 						binded = Key
@@ -2431,7 +2753,7 @@ function MacLib:Window(Settings)
 
 					function KeybindFunctions:Unbind()
 						binded = nil
-						KeybindFunctions.Binded = binded
+						KeybindFunctions.Binded = nil
 						binderBox.Text = ""
 					end
 
@@ -2440,16 +2762,39 @@ function MacLib:Window(Settings)
 					end
 
 					function KeybindFunctions:UpdateName(Name)
-						keybindName = Name
+						keybindName.Text = Name
 					end
 
 					function KeybindFunctions:SetVisibility(State)
 						keybind.Visible = State
 					end
 
-					if Flag then
-						MacLib.Options[Flag] = KeybindFunctions
+					function KeybindFunctions:Destroy()
+						if KeybindFunctions.Destroyed then return end
+						KeybindFunctions.Destroyed = true
+
+						if bindingEvent then
+							bindingEvent:Disconnect()
+							bindingEvent = nil
+						end
+
+						for _, connection in ipairs(KeybindFunctions.Connections) do
+							if connection.Connected then
+								connection:Disconnect()
+							end
+						end
+
+						table.clear(KeybindFunctions.Connections)
+
+						binded = nil
+						KeybindFunctions.Binded = nil
 					end
+
+					if Flag then
+						Calamari.Options[Flag] = KeybindFunctions
+					end
+
+					table.insert(Calamari.Keybinds, KeybindFunctions)
 
 					return KeybindFunctions
 				end
@@ -2490,10 +2835,10 @@ function MacLib:Window(Settings)
 
 					local dropdownName = Instance.new("TextLabel")
 					dropdownName.Name = "DropdownName"
-					dropdownName.FontFace = Font.new(assets.interFont)
+					dropdownName.FontFace = Font.new(Assets.InterFont)
 					dropdownName.Text = Settings.Default and (DropdownFunctions.Settings.Name .. " • " .. table.concat(Selected, ", ")) or (DropdownFunctions.Settings.Name .. "...")
 					dropdownName.RichText = true
-					dropdownName.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(dropdownName, "TextColor3", "Text")
 					dropdownName.TextSize = 13
 					dropdownName.TextTransparency = 0.5
 					dropdownName.TextTruncate = Enum.TextTruncate.SplitWord
@@ -2520,8 +2865,9 @@ function MacLib:Window(Settings)
 
 					local dropdownImage = Instance.new("ImageLabel")
 					dropdownImage.Name = "DropdownImage"
-					dropdownImage.Image = assets.dropdown
+					dropdownImage.Image = Assets.Dropdown
 					dropdownImage.ImageTransparency = 0.5
+					RegisterThemed(dropdownImage, "ImageColor3", "DropdownImage")
 					dropdownImage.AnchorPoint = Vector2.new(1, 0)
 					dropdownImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 					dropdownImage.BackgroundTransparency = 1
@@ -2569,18 +2915,18 @@ function MacLib:Window(Settings)
 					sectionUICorner.Name = "SectionUICorner"
 					sectionUICorner.Parent = search
 
-					local searchIcon = Instance.new("ImageLabel")
-					searchIcon.Name = "SearchIcon"
-					searchIcon.Image = assets.searchIcon
-					searchIcon.ImageColor3 = Color3.fromRGB(180, 180, 180)
-					searchIcon.AnchorPoint = Vector2.new(0, 0.5)
-					searchIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-					searchIcon.BackgroundTransparency = 1
-					searchIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
-					searchIcon.BorderSizePixel = 0
-					searchIcon.Position = UDim2.fromScale(0, 0.5)
-					searchIcon.Size = UDim2.fromOffset(12, 12)
-					searchIcon.Parent = search
+					local SearchIcon = Instance.new("ImageLabel")
+					SearchIcon.Name = "SearchIcon"
+					SearchIcon.Image = Assets.SearchIcon
+					RegisterThemed(SearchIcon, "ImageColor3", "Placeholder")
+					SearchIcon.AnchorPoint = Vector2.new(0, 0.5)
+					SearchIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					SearchIcon.BackgroundTransparency = 1
+					SearchIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
+					SearchIcon.BorderSizePixel = 0
+					SearchIcon.Position = UDim2.fromScale(0, 0.5)
+					SearchIcon.Size = UDim2.fromOffset(12, 12)
+					SearchIcon.Parent = search
 
 					local uIPadding = Instance.new("UIPadding")
 					uIPadding.Name = "UIPadding"
@@ -2591,14 +2937,14 @@ function MacLib:Window(Settings)
 					searchBox.Name = "SearchBox"
 					searchBox.CursorPosition = -1
 					searchBox.FontFace = Font.new(
-						assets.interFont,
+						Assets.InterFont,
 						Enum.FontWeight.Medium,
 						Enum.FontStyle.Normal
 					)
-					searchBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+					RegisterThemed(searchBox, "PlaceholderColor3", "Placeholder")
 					searchBox.PlaceholderText = "Search..."
 					searchBox.Text = ""
-					searchBox.TextColor3 = Color3.fromRGB(200, 200, 200)
+					RegisterThemed(searchBox, "TextColor3", "Text")
 					searchBox.TextSize = 14
 					searchBox.TextXAlignment = Enum.TextXAlignment.Left
 					searchBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -2780,10 +3126,10 @@ function MacLib:Window(Settings)
 
 						local optionName = Instance.new("TextLabel")
 						optionName.Name = "OptionName"
-						optionName.FontFace = Font.new(assets.interFont)
+						optionName.FontFace = Font.new(Assets.InterFont)
 						optionName.Text = v
 						optionName.RichText = true
-						optionName.TextColor3 = Color3.fromRGB(255, 255, 255)
+						RegisterThemed(optionName, "TextColor3", "Text")
 						optionName.TextSize = 13
 						optionName.TextTransparency = 0.5
 						optionName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -2808,9 +3154,9 @@ function MacLib:Window(Settings)
 
 						local checkmark = Instance.new("TextLabel")
 						checkmark.Name = "Checkmark"
-						checkmark.FontFace = Font.new(assets.interFont)
+						checkmark.FontFace = Font.new(Assets.InterFont)
 						checkmark.Text = "✓"
-						checkmark.TextColor3 = Color3.fromRGB(255, 255, 255)
+						RegisterThemed(checkmark, "TextColor3", "Text")
 						checkmark.TextSize = 13
 						checkmark.TextTransparency = 1
 						checkmark.TextXAlignment = Enum.TextXAlignment.Left
@@ -3020,7 +3366,7 @@ function MacLib:Window(Settings)
 					end
 
 					if Flag then
-						MacLib.Options[Flag] = DropdownFunctions
+						Calamari.Options[Flag] = DropdownFunctions
 					end
 
 					return DropdownFunctions
@@ -3045,9 +3391,9 @@ function MacLib:Window(Settings)
 
 					local colorpickerName = Instance.new("TextLabel")
 					colorpickerName.Name = "KeybindName"
-					colorpickerName.FontFace = Font.new(assets.interFont)
+					colorpickerName.FontFace = Font.new(Assets.InterFont)
 					colorpickerName.Text = Settings.Name
-					colorpickerName.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(colorpickerName, "TextColor3", "Text")
 					colorpickerName.TextSize = 13
 					colorpickerName.TextTransparency = 0.5
 					colorpickerName.RichText = true
@@ -3065,7 +3411,7 @@ function MacLib:Window(Settings)
 
 					local colorCbg = Instance.new("ImageLabel")
 					colorCbg.Name = "NewColor"
-					colorCbg.Image = assets.grid
+					colorCbg.Image = Assets.Grid
 					colorCbg.ScaleType = Enum.ScaleType.Tile
 					colorCbg.TileSize = UDim2.fromOffset(500, 500)
 					colorCbg.AnchorPoint = Vector2.new(1, 0.5)
@@ -3130,7 +3476,7 @@ function MacLib:Window(Settings)
 					prompt.Name = "Prompt"
 					prompt.AnchorPoint = Vector2.new(0.5, 0.5)
 					prompt.AutomaticSize = Enum.AutomaticSize.Y
-					prompt.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+					RegisterThemed(prompt, "BackgroundColor3", "Core")
 					prompt.BorderColor3 = Color3.fromRGB(0, 0, 0)
 					prompt.BorderSizePixel = 0
 					prompt.Position = UDim2.fromScale(0.5, 0.5)
@@ -3255,7 +3601,7 @@ function MacLib:Window(Settings)
 
 					local wheel1 = Instance.new("ImageButton")
 					wheel1.Name = "Wheel"
-					wheel1.Image = assets.colorWheel
+					wheel1.Image = Assets.ColorWheel
 					wheel1.AutoButtonColor = false
 					wheel1.Active = false
 					wheel1.BackgroundColor3 = Color3.fromRGB(248, 248, 248)
@@ -3267,7 +3613,7 @@ function MacLib:Window(Settings)
 
 					local target = Instance.new("ImageLabel")
 					target.Name = "Target"
-					target.Image = assets.colorTarget
+					target.Image = Assets.ColorTarget
 					target.ImageColor3 = Color3.fromRGB(0, 0, 0)
 					target.AnchorPoint = Vector2.new(0.5, 0.5)
 					target.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -3309,7 +3655,7 @@ function MacLib:Window(Settings)
 
 					local inputName = Instance.new("TextLabel")
 					inputName.Name = "InputName"
-					inputName.FontFace = Font.new(assets.interFont)
+					inputName.FontFace = Font.new(Assets.InterFont)
 					inputName.Text = "Red"
 					inputName.TextColor3 = Color3.fromRGB(255, 255, 255)
 					inputName.TextSize = 13
@@ -3339,7 +3685,7 @@ function MacLib:Window(Settings)
 					inputBox.Name = "InputBox"
 					inputBox.ClearTextOnFocus = false
 					inputBox.CursorPosition = -1
-					inputBox.FontFace = Font.new(assets.interFont)
+					inputBox.FontFace = Font.new(Assets.InterFont)
 					inputBox.Text = "255"
 					inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 					inputBox.TextSize = 12
@@ -3393,7 +3739,7 @@ function MacLib:Window(Settings)
 
 					local inputName1 = Instance.new("TextLabel")
 					inputName1.Name = "InputName"
-					inputName1.FontFace = Font.new(assets.interFont)
+					inputName1.FontFace = Font.new(Assets.InterFont)
 					inputName1.Text = "Green"
 					inputName1.TextColor3 = Color3.fromRGB(255, 255, 255)
 					inputName1.TextSize = 13
@@ -3422,7 +3768,7 @@ function MacLib:Window(Settings)
 					local inputBox1 = Instance.new("TextBox")
 					inputBox1.Name = "InputBox"
 					inputBox1.ClearTextOnFocus = false
-					inputBox1.FontFace = Font.new(assets.interFont)
+					inputBox1.FontFace = Font.new(Assets.InterFont)
 					inputBox1.Text = "255"
 					inputBox1.TextColor3 = Color3.fromRGB(255, 255, 255)
 					inputBox1.TextSize = 12
@@ -3476,7 +3822,7 @@ function MacLib:Window(Settings)
 
 					local inputName2 = Instance.new("TextLabel")
 					inputName2.Name = "InputName"
-					inputName2.FontFace = Font.new(assets.interFont)
+					inputName2.FontFace = Font.new(Assets.InterFont)
 					inputName2.Text = "Blue"
 					inputName2.TextColor3 = Color3.fromRGB(255, 255, 255)
 					inputName2.TextSize = 13
@@ -3505,7 +3851,7 @@ function MacLib:Window(Settings)
 					local inputBox2 = Instance.new("TextBox")
 					inputBox2.Name = "InputBox"
 					inputBox2.ClearTextOnFocus = false
-					inputBox2.FontFace = Font.new(assets.interFont)
+					inputBox2.FontFace = Font.new(Assets.InterFont)
 					inputBox2.Text = "255"
 					inputBox2.TextColor3 = Color3.fromRGB(255, 255, 255)
 					inputBox2.TextSize = 12
@@ -3560,7 +3906,7 @@ function MacLib:Window(Settings)
 
 					local inputName3 = Instance.new("TextLabel")
 					inputName3.Name = "InputName"
-					inputName3.FontFace = Font.new(assets.interFont)
+					inputName3.FontFace = Font.new(Assets.InterFont)
 					inputName3.Text = "Alpha"
 					inputName3.TextColor3 = Color3.fromRGB(255, 255, 255)
 					inputName3.TextSize = 13
@@ -3589,7 +3935,7 @@ function MacLib:Window(Settings)
 					local inputBox3 = Instance.new("TextBox")
 					inputBox3.Name = "InputBox"
 					inputBox3.ClearTextOnFocus = false
-					inputBox3.FontFace = Font.new(assets.interFont)
+					inputBox3.FontFace = Font.new(Assets.InterFont)
 					inputBox3.Text = "0"
 					inputBox3.TextColor3 = Color3.fromRGB(255, 255, 255)
 					inputBox3.TextSize = 12
@@ -3642,7 +3988,7 @@ function MacLib:Window(Settings)
 
 					local inputName4 = Instance.new("TextLabel")
 					inputName4.Name = "InputName"
-					inputName4.FontFace = Font.new(assets.interFont)
+					inputName4.FontFace = Font.new(Assets.InterFont)
 					inputName4.Text = "Hex"
 					inputName4.TextColor3 = Color3.fromRGB(255, 255, 255)
 					inputName4.TextSize = 13
@@ -3672,7 +4018,7 @@ function MacLib:Window(Settings)
 					inputBox4.Name = "InputBox"
 					inputBox4.ClearTextOnFocus = false
 					inputBox4.CursorPosition = -1
-					inputBox4.FontFace = Font.new(assets.interFont)
+					inputBox4.FontFace = Font.new(Assets.InterFont)
 					inputBox4.Text = "255"
 					inputBox4.TextColor3 = Color3.fromRGB(255, 255, 255)
 					inputBox4.TextSize = 12
@@ -3742,7 +4088,7 @@ function MacLib:Window(Settings)
 
 					local newColor = Instance.new("ImageLabel")
 					newColor.Name = "NewColor"
-					newColor.Image = assets.grid
+					newColor.Image = Assets.Grid
 					newColor.ScaleType = Enum.ScaleType.Tile
 					newColor.TileSize = UDim2.fromOffset(500, 500)
 					newColor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -3773,7 +4119,7 @@ function MacLib:Window(Settings)
 
 					local oldColor = Instance.new("ImageLabel")
 					oldColor.Name = "OldColor"
-					oldColor.Image = assets.grid
+					oldColor.Image = Assets.Grid
 					oldColor.ScaleType = Enum.ScaleType.Tile
 					oldColor.TileSize = UDim2.fromOffset(500, 500)
 					oldColor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -3837,7 +4183,7 @@ function MacLib:Window(Settings)
 					confirm.TextTruncate = Enum.TextTruncate.AtEnd
 					confirm.AutoButtonColor = false
 					confirm.AutomaticSize = Enum.AutomaticSize.Y
-					confirm.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+					RegisterThemed(confirm, "BackgroundColor3", "Dialogue")
 					confirm.BorderColor3 = Color3.fromRGB(0, 0, 0)
 					confirm.BorderSizePixel = 0
 					confirm.Size = UDim2.fromScale(1, 0)
@@ -3871,7 +4217,7 @@ function MacLib:Window(Settings)
 					cancel.TextTruncate = Enum.TextTruncate.AtEnd
 					cancel.AutoButtonColor = false
 					cancel.AutomaticSize = Enum.AutomaticSize.Y
-					cancel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+					RegisterThemed(cancel, "BackgroundColor3", "Dialogue")
 					cancel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 					cancel.BorderSizePixel = 0
 					cancel.Size = UDim2.fromScale(1, 0)
@@ -3924,7 +4270,7 @@ function MacLib:Window(Settings)
 					)
 					paragraphHeader.RichText = true
 					paragraphHeader.Text = ColorpickerFunctions.Settings.Name
-					paragraphHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(paragraphHeader, "TextColor3", "Text")
 					paragraphHeader.TextSize = 18
 					paragraphHeader.TextTransparency = 0.4
 					paragraphHeader.TextWrapped = true
@@ -4049,7 +4395,7 @@ function MacLib:Window(Settings)
 
 						ring.Position = udim2(0.5, d.x, 0.5, d.y)
 						local phi, len = toPolar(d * v2(1, -1))
-						hue, saturation = radToDeg(phi) / 360, math.clamp(len / r, 0, 1)
+						hue, saturation = (radToDeg(-phi) / 360 + 0.5) % 1, math.clamp(len / r, 0, 1)
 						slider.BackgroundColor3 = fromHSV(hue, saturation, 1)
 						update()
 					end
@@ -4063,10 +4409,10 @@ function MacLib:Window(Settings)
 						local r = wheel.AbsoluteSize.X / 2
 						local phi = degToRad(hue * 360)
 						local len = saturation * r
-						local x = len * math.cos(phi)
-						local y = len * math.sin(phi)
+						local x = len * math.cos(-phi)
+						local y = len * math.sin(-phi)
 
-						ring.Position = UDim2.new(0.5, -x, 0.5, y)
+						ring.Position = UDim2.new(0.5, x, 0.5, -y)
 						slider.BackgroundColor3 = fromHSV(hue, saturation, 1)
 					end
 
@@ -4305,7 +4651,7 @@ function MacLib:Window(Settings)
 					end
 
 					if Flag then
-						MacLib.Options[Flag] = ColorpickerFunctions
+						Calamari.Options[Flag] = ColorpickerFunctions
 					end
 					return ColorpickerFunctions
 				end
@@ -4332,13 +4678,13 @@ function MacLib:Window(Settings)
 					local headerText = Instance.new("TextLabel")
 					headerText.Name = "HeaderText"
 					headerText.FontFace = Font.new(
-						assets.interFont,
+						Assets.InterFont,
 						Enum.FontWeight.Medium,
 						Enum.FontStyle.Normal
 					)
 					headerText.RichText = true
 					headerText.Text = HeaderFunctions.Settings.Text or HeaderFunctions.Settings.Name
-					headerText.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(headerText, "TextColor3", "Text")
 					headerText.TextSize = 16
 					headerText.TextTransparency = 0.3
 					headerText.TextWrapped = true
@@ -4359,7 +4705,7 @@ function MacLib:Window(Settings)
 					end
 
 					if Flag then
-						MacLib.Options[Flag] = HeaderFunctions
+						Calamari.Options[Flag] = HeaderFunctions
 					end
 					return HeaderFunctions
 				end
@@ -4379,10 +4725,10 @@ function MacLib:Window(Settings)
 
 					local labelText = Instance.new("TextLabel")
 					labelText.Name = "LabelText"
-					labelText.FontFace = Font.new(assets.interFont)
+					labelText.FontFace = Font.new(Assets.InterFont)
 					labelText.RichText = true
-					labelText.Text = LabelFunctions.Settings.Text or LabelFunctions.Settings.Name -- Settings.Name Deprecated use Settings.Text
-					labelText.TextColor3 = Color3.fromRGB(255, 255, 255)
+					labelText.Text = LabelFunctions.Settings.Text or LabelFunctions.Settings.Name
+					RegisterThemed(labelText, "TextColor3", "Text")
 					labelText.TextSize = 13
 					labelText.TextTransparency = 0.5
 					labelText.TextWrapped = true
@@ -4403,7 +4749,7 @@ function MacLib:Window(Settings)
 					end
 
 					if Flag then
-						MacLib.Options[Flag] = LabelFunctions
+						Calamari.Options[Flag] = LabelFunctions
 					end
 					return LabelFunctions
 				end
@@ -4423,10 +4769,10 @@ function MacLib:Window(Settings)
 
 					local subLabelText = Instance.new("TextLabel")
 					subLabelText.Name = "SubLabelText"
-					subLabelText.FontFace = Font.new(assets.interFont)
+					subLabelText.FontFace = Font.new(Assets.InterFont)
 					subLabelText.RichText = true
-					subLabelText.Text = SubLabelFunctions.Settings.Text or SubLabelFunctions.Settings.Name -- Settings.Name Deprecated use Settings.Text
-					subLabelText.TextColor3 = Color3.fromRGB(255, 255, 255)
+					subLabelText.Text = SubLabelFunctions.Settings.Text or SubLabelFunctions.Settings.Name
+					RegisterThemed(subLabelText, "TextColor3", "Text")
 					subLabelText.TextSize = 12
 					subLabelText.TextTransparency = 0.7
 					subLabelText.TextWrapped = true
@@ -4447,7 +4793,7 @@ function MacLib:Window(Settings)
 					end
 
 					if Flag then
-						MacLib.Options[Flag] = SubLabelFunctions
+						Calamari.Options[Flag] = SubLabelFunctions
 					end
 					return SubLabelFunctions
 				end
@@ -4468,13 +4814,13 @@ function MacLib:Window(Settings)
 					local paragraphHeader = Instance.new("TextLabel")
 					paragraphHeader.Name = "ParagraphHeader"
 					paragraphHeader.FontFace = Font.new(
-						assets.interFont,
+						Assets.InterFont,
 						Enum.FontWeight.Medium,
 						Enum.FontStyle.Normal
 					)
 					paragraphHeader.RichText = true
 					paragraphHeader.Text = ParagraphFunctions.Settings.Header
-					paragraphHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(paragraphHeader, "TextColor3", "Text")
 					paragraphHeader.TextSize = 15
 					paragraphHeader.TextTransparency = 0.4
 					paragraphHeader.TextWrapped = true
@@ -4495,10 +4841,10 @@ function MacLib:Window(Settings)
 
 					local paragraphBody = Instance.new("TextLabel")
 					paragraphBody.Name = "ParagraphBody"
-					paragraphBody.FontFace = Font.new(assets.interFont)
+					paragraphBody.FontFace = Font.new(Assets.InterFont)
 					paragraphBody.RichText = true
 					paragraphBody.Text = ParagraphFunctions.Settings.Body
-					paragraphBody.TextColor3 = Color3.fromRGB(255, 255, 255)
+					RegisterThemed(paragraphBody, "TextColor3", "Text")
 					paragraphBody.TextSize = 13
 					paragraphBody.TextTransparency = 0.5
 					paragraphBody.TextWrapped = true
@@ -4523,7 +4869,7 @@ function MacLib:Window(Settings)
 					end
 
 					if Flag then
-						MacLib.Options[Flag] = ParagraphFunctions
+						Calamari.Options[Flag] = ParagraphFunctions
 					end
 					return ParagraphFunctions
 				end
@@ -4602,38 +4948,38 @@ function MacLib:Window(Settings)
 			local function SelectCurrentTab()
 				local easetime = 0.15
 
-				if currentTabInstance then
-					currentTabInstance.Parent = nil
+				if CurrentTabInstance then
+					CurrentTabInstance.Parent = nil
 				end
 
-				for i, tabInfo in pairs(tabs) do
+				for i, tabInfo in pairs(Tabs) do
 					Tween(i, TweenInfo.new(easetime, Enum.EasingStyle.Sine), {
-						BackgroundTransparency = (i == tabSwitcher and 0.98 or 1)
+						BackgroundTransparency = (i == Tabswitcher and 0.98 or 1)
 					}):Play()
 
-					if tabInfo.tabStroke then
-						Tween(tabInfo.tabStroke, TweenInfo.new(easetime, Enum.EasingStyle.Sine), {
-							Transparency = (i == tabSwitcher and 0.95 or 1)
+					if tabInfo.Tabstroke then
+						Tween(tabInfo.Tabstroke, TweenInfo.new(easetime, Enum.EasingStyle.Sine), {
+							Transparency = (i == Tabswitcher and 0.95 or 1)
 						}):Play()
 					end
 					if tabInfo.switcherImage then
 						Tween(tabInfo.switcherImage, TweenInfo.new(easetime, Enum.EasingStyle.Sine), {
-							ImageTransparency = (i == tabSwitcher and 0.1 or 0.5)
+							ImageTransparency = (i == Tabswitcher and 0.1 or 0.5)
 						}):Play()
 					end
 					if tabInfo.switcherName then
 						Tween(tabInfo.switcherName, TweenInfo.new(easetime, Enum.EasingStyle.Sine), {
-							TextTransparency = (i == tabSwitcher and 0.1 or 0.5)
+							TextTransparency = (i == Tabswitcher and 0.1 or 0.5)
 						}):Play()
 					end
 				end
 
-				tabs[tabSwitcher].tabContent.Parent = content
-				currentTabInstance = tabs[tabSwitcher].tabContent
+				Tabs[Tabswitcher].tabContent.Parent = content
+				CurrentTabInstance = Tabs[Tabswitcher].tabContent
 				currentTab.Text = Settings.Name
 			end
 
-			tabSwitcher.MouseButton1Click:Connect(function()
+			Tabswitcher.MouseButton1Click:Connect(function()
 				SelectCurrentTab()
 			end)
 
@@ -4644,8 +4990,8 @@ function MacLib:Window(Settings)
 			function TabFunctions:InsertConfigSection(Side)
 				local configSection = TabFunctions:Section({ Side = "Left" })
 
-				if isStudio then
-					configSection:Label({Text = "Config system unavailable. (Environment isStudio)"})
+				if IsStudio then
+					configSection:Label({Text = "Config system unavailable. (Environment IsStudio)"})
 					return "Config system unavailable." 
 				end
 
@@ -4665,7 +5011,7 @@ function MacLib:Window(Settings)
 					Name = "Select Config",
 					Multi = false,
 					Required = false,
-					Options = MacLib:RefreshConfigList(),
+					Options = Calamari:RefreshConfigList(),
 					Callback = function(Value)
 						selectedConfig = Value
 					end,
@@ -4682,7 +5028,7 @@ function MacLib:Window(Settings)
 							return
 						end
 
-						local success, returned = MacLib:SaveConfig(inputPath)
+						local success, returned = Calamari:SaveConfig(inputPath)
 						if not success then
 							WindowFunctions:Notify({
 								Title = "Interface",
@@ -4696,14 +5042,14 @@ function MacLib:Window(Settings)
 						})
 
 						configSelection:ClearOptions()
-						configSelection:InsertOptions(MacLib:RefreshConfigList())
+						configSelection:InsertOptions(Calamari:RefreshConfigList())
 					end,
 				})
 
 				configSection:Button({
 					Name = "Load Config",
 					Callback = function()
-						local success, returned = MacLib:LoadConfig(configSelection.Value)
+						local success, returned = Calamari:LoadConfig(configSelection.Value)
 						if not success then
 							WindowFunctions:Notify({
 								Title = "Interface",
@@ -4722,7 +5068,7 @@ function MacLib:Window(Settings)
 				configSection:Button({
 					Name = "Overwrite Config",
 					Callback = function()
-						local success, returned = MacLib:SaveConfig(configSelection.Value)
+						local success, returned = Calamari:SaveConfig(configSelection.Value)
 						if not success then
 							WindowFunctions:Notify({
 								Title = "Interface",
@@ -4742,7 +5088,7 @@ function MacLib:Window(Settings)
 					Name = "Refresh Config List",
 					Callback = function()
 						configSelection:ClearOptions()
-						configSelection:InsertOptions(MacLib:RefreshConfigList())
+						configSelection:InsertOptions(Calamari:RefreshConfigList())
 					end,
 				})
 
@@ -4752,7 +5098,7 @@ function MacLib:Window(Settings)
 					Name = "Set as autoload",
 					Callback = function()
 						local name = configSelection.Value
-						writefile(MacLib.Folder .. "/settings/autoload.txt", name)
+						writefile(Calamari.Folder .. "/settings/autoload.txt", name)
 						autoloadLabel:UpdateName("Autoload config: " .. name)
 						WindowFunctions:Notify({
 							Title = "Interface",
@@ -4763,17 +5109,17 @@ function MacLib:Window(Settings)
 
 				autoloadLabel = configSection:Label({Text = "Autoload config: None"})
 
-				if isfile(MacLib.Folder .. "/settings/autoload.txt") then
-					local name = readfile(MacLib.Folder .. "/settings/autoload.txt")
+				if isfile(Calamari.Folder .. "/settings/autoload.txt") then
+					local name = readfile(Calamari.Folder .. "/settings/autoload.txt")
 					autoloadLabel:UpdateName("Autoload config: " .. name)
 				end
 			end
 
-			tabs[tabSwitcher] = {
+			Tabs[Tabswitcher] = {
 				tabContent = elements1,
-				tabStroke = tabSwitcherUIStroke,
+				Tabstroke = TabswitcherUIStroke,
 				switcherImage = tabImage,
-				switcherName = tabSwitcherName,
+				switcherName = TabswitcherName,
 			}
 
 			return TabFunctions
@@ -4789,7 +5135,7 @@ function MacLib:Window(Settings)
 		notification.Name = "Notification"
 		notification.AnchorPoint = Vector2.new(0.5, 0.5)
 		notification.AutomaticSize = Enum.AutomaticSize.Y
-		notification.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+		RegisterThemed(notification, "BackgroundColor3", "Core")
 		notification.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		notification.BorderSizePixel = 0
 		notification.Position = UDim2.fromScale(0.5, 0.5)
@@ -4826,7 +5172,7 @@ function MacLib:Window(Settings)
 		local notificationTitle = Instance.new("TextLabel")
 		notificationTitle.Name = "NotificationTitle"
 		notificationTitle.FontFace = Font.new(
-			assets.interFont,
+			Assets.InterFont,
 			Enum.FontWeight.SemiBold,
 			Enum.FontStyle.Normal
 		)
@@ -4855,7 +5201,7 @@ function MacLib:Window(Settings)
 		local notificationDescription = Instance.new("TextLabel")
 		notificationDescription.Name = "NotificationDescription"
 		notificationDescription.FontFace = Font.new(
-			assets.interFont,
+			Assets.InterFont,
 			Enum.FontWeight.Medium,
 			Enum.FontStyle.Normal
 		)
@@ -4903,7 +5249,7 @@ function MacLib:Window(Settings)
 
 		local interactable = Instance.new("TextButton")
 		interactable.Name = "Interactable"
-		interactable.FontFace = Font.new(assets.interFont)
+		interactable.FontFace = Font.new(Assets.InterFont)
 		interactable.Text = "✓"
 		interactable.TextColor3 = Color3.fromRGB(255, 255, 255)
 		interactable.TextSize = 17
@@ -5024,7 +5370,7 @@ function MacLib:Window(Settings)
 		prompt.Name = "Prompt"
 		prompt.AnchorPoint = Vector2.new(0.5, 0.5)
 		prompt.AutomaticSize = Enum.AutomaticSize.Y
-		prompt.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+		RegisterThemed(prompt, "BackgroundColor3", "Core")
 		prompt.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		prompt.BorderSizePixel = 0
 		prompt.Position = UDim2.fromScale(0.5, 0.5)
@@ -5067,7 +5413,7 @@ function MacLib:Window(Settings)
 		local paragraphHeader = Instance.new("TextLabel")
 		paragraphHeader.Name = "ParagraphHeader"
 		paragraphHeader.FontFace = Font.new(
-			assets.interFont,
+			Assets.InterFont,
 			Enum.FontWeight.Medium,
 			Enum.FontStyle.Normal
 		)
@@ -5093,7 +5439,7 @@ function MacLib:Window(Settings)
 
 		local paragraphBody = Instance.new("TextLabel")
 		paragraphBody.Name = "ParagraphBody"
-		paragraphBody.FontFace = Font.new(assets.interFont)
+		paragraphBody.FontFace = Font.new(Assets.InterFont)
 		paragraphBody.RichText = true
 		paragraphBody.Text = Settings.Description
 		paragraphBody.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -5165,10 +5511,10 @@ function MacLib:Window(Settings)
 			dialogCanvas:Destroy()
 		end
 
-		for _, v in pairs(Settings.Buttons) do
+		for _, v in next, Settings.Buttons do
 			local button = Instance.new("TextButton")
 			button.Name = "Button"
-			button.FontFace = Font.new(assets.interFont)
+			button.FontFace = Font.new(Assets.InterFont)
 			button.Text = v.Name
 			button.TextColor3 = Color3.fromRGB(255, 255, 255)
 			button.TextSize = 15
@@ -5176,7 +5522,7 @@ function MacLib:Window(Settings)
 			button.TextTruncate = Enum.TextTruncate.AtEnd
 			button.AutoButtonColor = false
 			button.AutomaticSize = Enum.AutomaticSize.Y
-			button.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+			RegisterThemed(button, "BackgroundColor3", "Dialogue")
 			button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			button.BorderSizePixel = 0
 			button.Size = UDim2.fromScale(1, 0)
@@ -5261,23 +5607,35 @@ function MacLib:Window(Settings)
 	end
 
 	function WindowFunctions:SetState(State)
-		windowState = State
+		WindowState = State
 		base.Visible = State
 	end
 
 	function WindowFunctions:GetState()
-		return windowState
+		return WindowState
 	end
 
 	local onUnloadCallback
 
+
 	function WindowFunctions:Unload()
+		if Unloaded then return end
+		
+		Unloaded = true
+
 		if onUnloadCallback then
-			onUnloadCallback()  
+			onUnloadCallback()
 		end
-		macLib:Destroy()
-		unloaded = true
+
+		for _, keybind in ipairs(Calamari.Keybinds) do
+			keybind:Destroy()
+		end
+
+		table.clear(Calamari.Keybinds)
+
+		calamari:Destroy()
 	end
+
 
 	function WindowFunctions.onUnloaded(callback)
 		onUnloadCallback = callback
@@ -5326,12 +5684,12 @@ function MacLib:Window(Settings)
 	end
 
 	function WindowFunctions:SetAcrylicBlurState(State)
-		acrylicBlur = State
+		AcrylicBlur = State
 		base.BackgroundTransparency = State and 0.05 or 0
 	end
 
 	function WindowFunctions:GetAcrylicBlurState()
-		return acrylicBlur
+		return AcrylicBlur
 	end
 
 	local function _SetUserInfoState(State)
@@ -5340,7 +5698,7 @@ function MacLib:Window(Settings)
 			username.Text = "@" .. LocalPlayer.Name
 			displayName.Text = LocalPlayer.DisplayName
 		else
-			headshot.Image = assets.userInfoBlurred
+			headshot.Image = Assets.UserInfoBlurred
 			local nameLength = #LocalPlayer.Name
 			local displayNameLength = #LocalPlayer.DisplayName
 			username.Text = "@" .. string.rep(".", nameLength)
@@ -5360,13 +5718,51 @@ function MacLib:Window(Settings)
 	function WindowFunctions:SetUserInfoState(State)
 		_SetUserInfoState(State)
 	end
+
 	function WindowFunctions:GetUserInfoState(State)
 		return showUserInfo
+	end
+
+	function WindowFunctions:SetTheme(ThemeName)
+		if not Themes[ThemeName] then
+			return false, "Theme '" .. ThemeName .. "' does not exist."
+		end
+
+		CurrentTheme = ThemeName
+
+		for _, entry in next, ThemedElements do
+			if entry.instance and entry.instance.Parent then
+				entry.instance[entry.property] = Themes[ThemeName][entry.key]
+			end
+		end
+
+		for _, callback in next, ThemedCallbacks do
+			callback(ThemeName)
+		end
+
+		return true
+	end
+
+	function WindowFunctions:GetTheme()
+		return CurrentTheme
+	end
+
+	function WindowFunctions:GetThemes()
+		local list = {}
+
+		for name in next, Themes do
+			table.insert(list, name)
+		end
+
+		table.sort(list)
+
+		return list
 	end
 
 	function WindowFunctions:SetSize(Size)
 		base.Size = Size
 	end
+
 	function WindowFunctions:GetSize(Size)
 		return base.Size
 	end
@@ -5374,8 +5770,13 @@ function MacLib:Window(Settings)
 	function WindowFunctions:SetScale(Scale)
 		baseUIScale.Scale = Scale
 	end
+
 	function WindowFunctions:GetScale()
 		return baseUIScale.Scale
+	end
+
+	function WindowFunctions:GetVersion()
+		return Calamari.Version
 	end
 
 	local ClassParser = {
@@ -5388,8 +5789,8 @@ function MacLib:Window(Settings)
 				}
 			end,
 			Load = function(Flag, data)
-				if MacLib.Options[Flag] and data.state then
-					MacLib.Options[Flag]:UpdateState(data.state)
+				if Calamari.Options[Flag] and data.state then
+					Calamari.Options[Flag]:UpdateState(data.state)
 				end
 			end
 		},
@@ -5403,8 +5804,8 @@ function MacLib:Window(Settings)
 			end,
 
 			Load = function(Flag, data)
-				if MacLib.Options[Flag] and data.value then
-					local slider = MacLib.Options[Flag]
+				if Calamari.Options[Flag] and data.value then
+					local slider = Calamari.Options[Flag]
 					slider:UpdateValue(data.value)
 
 					if slider.Settings.Callback then
@@ -5422,8 +5823,8 @@ function MacLib:Window(Settings)
 				}
 			end,
 			Load = function(Flag, data)
-				if MacLib.Options[Flag] and data.text and type(data.text) == "string" then
-					MacLib.Options[Flag]:UpdateText(data.text)
+				if Calamari.Options[Flag] and data.text and type(data.text) == "string" then
+					Calamari.Options[Flag]:UpdateText(data.text)
 				end
 			end
 		},
@@ -5436,8 +5837,8 @@ function MacLib:Window(Settings)
 				}
 			end,
 			Load = function(Flag, data)
-				if MacLib.Options[Flag] and data.bind then
-					MacLib.Options[Flag]:Bind(Enum.KeyCode[data.bind])
+				if Calamari.Options[Flag] and data.bind then
+					Calamari.Options[Flag]:Bind(Enum.KeyCode[data.bind])
 				end
 			end
 		},
@@ -5450,8 +5851,8 @@ function MacLib:Window(Settings)
 				}
 			end,
 			Load = function(Flag, data)
-				if MacLib.Options[Flag] and data.value then
-					MacLib.Options[Flag]:UpdateSelection(data.value)
+				if Calamari.Options[Flag] and data.value then
+					Calamari.Options[Flag]:UpdateSelection(data.value)
 				end
 			end
 		},
@@ -5476,10 +5877,10 @@ function MacLib:Window(Settings)
 					return Color3.new(r, g, b)
 				end
 
-				if MacLib.Options[Flag] and data.color then
-					MacLib.Options[Flag]:SetColor(HexToColor3(data.color)) 
+				if Calamari.Options[Flag] and data.color then
+					Calamari.Options[Flag]:SetColor(HexToColor3(data.color)) 
 					if data.alpha then
-						MacLib.Options[Flag]:SetAlpha(data.alpha)
+						Calamari.Options[Flag]:SetAlpha(data.alpha)
 					end
 				end
 			end
@@ -5487,11 +5888,11 @@ function MacLib:Window(Settings)
 	}
 
 	local function BuildFolderTree()
-		if isStudio or not (isfolder and makefolder) then return "Config system unavailable." end
+		if IsStudio or not (isfolder and makefolder) then return "Config system unavailable." end
 
 		local paths = {
-			MacLib.Folder,
-			MacLib.Folder .. "/settings"
+			Calamari.Folder,
+			Calamari.Folder .. "/settings"
 		}
 
 		for i = 1, #paths do
@@ -5502,13 +5903,13 @@ function MacLib:Window(Settings)
 		end
 	end
 
-	function MacLib:LoadAutoLoadConfig()
-		if isStudio or not (isfile and readfile) then return "Config system unavailable." end
+	function Calamari:LoadAutoLoadConfig()
+		if IsStudio or not (isfile and readfile) then return "Config system unavailable." end
 
-		if isfile(MacLib.Folder .. "/settings/autoload.txt") then
-			local name = readfile(MacLib.Folder .. "/settings/autoload.txt")
+		if isfile(Calamari.Folder .. "/settings/autoload.txt") then
+			local name = readfile(Calamari.Folder .. "/settings/autoload.txt")
 
-			local suc, err = MacLib:LoadConfig(name)
+			local suc, err = Calamari:LoadConfig(name)
 			if not suc then
 				WindowFunctions:Notify({
 					Title = "Interface",
@@ -5523,27 +5924,27 @@ function MacLib:Window(Settings)
 		end
 	end
 
-	function MacLib:SetFolder(Folder)
-		if isStudio then return "Config system unavailable." end
+	function Calamari:SetFolder(Folder)
+		if IsStudio then return "Config system unavailable." end
 
-		MacLib.Folder = Folder;
+		Calamari.Folder = Folder;
 		BuildFolderTree()
 	end
 
-	function MacLib:SaveConfig(Path)
-		if isStudio or not writefile then return "Config system unavailable." end
+	function Calamari:SaveConfig(Path)
+		if IsStudio or not writefile then return "Config system unavailable." end
 
 		if (not Path) then
 			return false, "Please select a config file."
 		end
 
-		local fullPath = MacLib.Folder .. "/settings/" .. Path .. ".json"
+		local fullPath = Calamari.Folder .. "/settings/" .. Path .. ".json"
 
 		local data = {
 			objects = {}
 		}
 
-		for flag, option in next, MacLib.Options do
+		for flag, option in next, Calamari.Options do
 			if not ClassParser[option.Class] then continue end
 			if option.IgnoreConfig then continue end
 
@@ -5559,14 +5960,14 @@ function MacLib:Window(Settings)
 		return true
 	end
 
-	function MacLib:LoadConfig(Path)
-		if isStudio or not (isfile and readfile) then return "Config system unavailable." end
+	function Calamari:LoadConfig(Path)
+		if IsStudio or not (isfile and readfile) then return "Config system unavailable." end
 
 		if (not Path) then
 			return false, "Please select a config file."
 		end
 
-		local file = MacLib.Folder .. "/settings/" .. Path .. ".json"
+		local file = Calamari.Folder .. "/settings/" .. Path .. ".json"
 		if not isfile(file) then return false, "Invalid file" end
 
 		local success, decoded = pcall(HttpService.JSONDecode, HttpService, readfile(file))
@@ -5583,10 +5984,10 @@ function MacLib:Window(Settings)
 		return true
 	end
 
-	function MacLib:RefreshConfigList()
-		if isStudio or not (isfolder and listfiles) then return "Config system unavailable." end
+	function Calamari:RefreshConfigList()
+		if IsStudio or not (isfolder and listfiles) then return "Config system unavailable." end
 
-		local list = (isfolder(MacLib.Folder) and isfolder(MacLib.Folder .. "/settings")) and listfiles(MacLib.Folder .. "/settings") or {}
+		local list = (isfolder(Calamari.Folder) and isfolder(Calamari.Folder .. "/settings")) and listfiles(Calamari.Folder .. "/settings") or {}
 
 		local out = {}
 		for i = 1, #list do
@@ -5613,281 +6014,251 @@ function MacLib:Window(Settings)
 		return out
 	end
 
-	macLib.Enabled = false
+	WindowFunctions:SetTheme("Calamari")
+
+	calamari.Enabled = false
 
 	local assetList = {}
-	for _, assetId in pairs(assets) do
+	for _, assetId in pairs(Assets) do
 		table.insert(assetList, assetId)
 	end
 
 	ContentProvider:PreloadAsync(assetList)
-	macLib.Enabled = true
-	windowState = true
+	calamari.Enabled = true
+	WindowState = true
 
 	return WindowFunctions
 end
 
-function MacLib:Demo()
-	local Window = MacLib:Window({
-		Title = "Maclib Demo",
-		Subtitle = "This is a subtitle.",
-		Size = UDim2.fromOffset(868, 650),
-		DragStyle = 1,
-		DisabledWindowControls = {},
-		ShowUserInfo = true,
-		Keybind = Enum.KeyCode.RightControl,
-		AcrylicBlur = true,
-	})
+getgenv().Core = {}
 
-	local globalSettings = {
-		UIBlurToggle = Window:GlobalSetting({
-			Name = "UI Blur",
-			Default = Window:GetAcrylicBlurState(),
-			Callback = function(bool)
-				Window:SetAcrylicBlurState(bool)
-				Window:Notify({
-					Title = Window.Settings.Title,
-					Description = (bool and "Enabled" or "Disabled") .. " UI Blur",
-					Lifetime = 5
-				})
-			end,
-		}),
-		NotificationToggler = Window:GlobalSetting({
-			Name = "Notifications",
-			Default = Window:GetNotificationsState(),
-			Callback = function(bool)
-				Window:SetNotificationsState(bool)
-				Window:Notify({
-					Title = Window.Settings.Title,
-					Description = (bool and "Enabled" or "Disabled") .. " Notifications",
-					Lifetime = 5
-				})
-			end,
-		}),
-		ShowUserInfo = Window:GlobalSetting({
-			Name = "Show User Info",
-			Default = Window:GetUserInfoState(),
-			Callback = function(bool)
-				Window:SetUserInfoState(bool)
-				Window:Notify({
-					Title = Window.Settings.Title,
-					Description = (bool and "Showing" or "Redacted") .. " User Info",
-					Lifetime = 5
-				})
-			end,
-		})
-	}
+local Core = getgenv().Core
 
-	local tabGroups = {
-		TabGroup1 = Window:TabGroup()
-	}
+Core.Version = "1.0.0"
+Core.Loaded = true
 
-	local tabs = {
-		Main = tabGroups.TabGroup1:Tab({ Name = "Demo", Image = "rbxassetid://18821914323" }),
-		Settings = tabGroups.TabGroup1:Tab({ Name = "Settings", Image = "rbxassetid://10734950309" })
-	}
+Core.Services = {}
+Core.Features = {}
+Core.Connections = {}
+Core.Keybinds = {}
+Core.Hooks = {}
 
-	local sections = {
-		MainSection1 = tabs.Main:Section({ Side = "Left" }),
-	}
+local Services = Core.Services
 
-	sections.MainSection1:Header({
-		Name = "Header #1"
-	})
+Services.Players = game:GetService("Players")
+Services.RunService = game:GetService("RunService")
+Services.ReplicatedStorage = game:GetService("ReplicatedStorage")
+Services.UserInputService = game:GetService("UserInputService")
+Services.VirtualInputManager = game:GetService("VirtualInputManager")
+Services.TeleportService = game:GetService("TeleportService")
 
-	sections.MainSection1:Button({
-		Name = "Button",
-		Callback = function()
-			Window:Dialog({
-				Title = Window.Settings.Title,
-				Description = "Lorem ipsum odor amet, consectetuer adipiscing elit. Eros vestibulum aliquet mattis, ex platea nunc.",
-				Buttons = {
-					{
-						Name = "Confirm",
-						Callback = function()
-							print("Confirmed!")
-						end,
-					},
-					{
-						Name = "Cancel"
-					}
-				}
-			})
-		end,
-	})
+local LocalPlayer = Services.Players.LocalPlayer
 
-	sections.MainSection1:Input({
-		Name = "Input",
-		Placeholder = "Input",
-		AcceptedCharacters = "All",
-		Callback = function(input)
-			Window:Notify({
-				Title = Window.Settings.Title,
-				Description = "Successfully set input to " .. input
-			})
-		end,
-		onChanged = function(input)
-			print("Input is now " .. input)
-		end,
-	}, "Input")
+local Camera = workspace.CurrentCamera
 
-	sections.MainSection1:Slider({
-		Name = "Slider",
-		Default = 50,
-		Minimum = 0,
-		Maximum = 100,
-		DisplayMethod = "Percent",
-		Precision = 0,
-		Callback = function(Value)
-			print("Changed to ".. Value)
-		end
-	}, "Slider")
+local folder_name = "Calamari/Test"
 
-	sections.MainSection1:Toggle({
-		Name = "Toggle",
-		Default = false,
-		Callback = function(value)
-			Window:Notify({
-				Title = Window.Settings.Title,
-				Description = (value and "Enabled " or "Disabled ") .. "Toggle"
-			})
-		end,
-	}, "Toggle")
+local window = Calamari:Window({
+	Title = "Calamari",
+	Subtitle = "test",
+	Size = UserInputService.TouchEnabled and UDim2.fromOffset(600, 400) or UDim2.fromOffset(800, 600),
+	DragStyle = 1,
+	ShowUserInfo = true,
+	Keybind = Enum.KeyCode.RightAlt,
+	AcrylicBlur = true,
+})
 
-	sections.MainSection1:Keybind({
-		Name = "Keybind",
-		Blacklist = false,
-		Callback = function(binded)
-			Window:Notify({
-				Title = "Demo Window",
-				Description = "Pressed keybind - "..tostring(binded.Name),
-				Lifetime = 3
-			})
-		end,
-		onBinded = function(bind)
-			Window:Notify({
-				Title = "Demo Window",
-				Description = "Successfully Binded Keybind to - "..tostring(bind.Name),
-				Lifetime = 3
-			})
-		end,
-	}, "Keybind")
+Calamari:SetFolder(folder_name)
 
-	sections.MainSection1:Colorpicker({
-		Name = "Colorpicker",
-		Default = Color3.fromRGB(0, 255, 255),
-		Callback = function(color)
-			print("Color: ", color)
-		end,
-	}, "Colorpicker")
+local main_group = window:TabGroup()
 
-	local alphaColorPicker = sections.MainSection1:Colorpicker({
-		Name = "Transparency Colorpicker",
-		Default = Color3.fromRGB(255,0,0),
-		Alpha = 0,
-		Callback = function(color, alpha)
-			print("Color: ", color, " Alpha: ", alpha)
-		end,
-	}, "TransparencyColorpicker")
+local tabs = {
+	Combat = main_group:Tab({Name = "Combat", Image = "rbxassetid://129698054"}),
+	Mobility = main_group:Tab({Name = "Mobility", Image = "rbxassetid://7992557358"}),
+	Render = main_group:Tab({Name = "Render", Image = "rbxassetid://6523858394"}),
+	UtilityTab = main_group:Tab({Name = "Utility", Image = "rbxassetid://5042052135"}),
+	Settings = main_group:Tab({Name = "Settings", Image = "rbxassetid://132848201849699"}),
+}
 
-	local rainbowActive
-	local rainbowConnection
-	local hue = 0
+function Core:GetParts(Player: Player)
+	local character = Player.Character
+	if not character then return end
 
-	sections.MainSection1:Toggle({
-		Name = "Rainbow",
-		Default = false,
-		Callback = function(value)
-			rainbowActive = value
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid then return end
 
-			if rainbowActive then
-				rainbowConnection = game:GetService("RunService").RenderStepped:Connect(function(deltaTime)
-					hue = (hue + deltaTime * 0.1) % 1
-					alphaColorPicker:SetColor(Color3.fromHSV(hue, 1, 1))
-				end)
-			elseif rainbowConnection then
-				rainbowConnection:Disconnect()
-				rainbowConnection = nil
-			end
-		end,
-	}, "RainbowToggle")
+	local humanoid_root_part = character:FindFirstChild("HumanoidRootPart")
+	if not humanoid_root_part then return end
 
-	local optionTable = {
-		"Apple",
-		"Banana",
-		"Orange",
-		"Grapes",
-		"Pineapple",
-		"Mango",
-		"Strawberry",
-		"Blueberry",
-		"Watermelon",
-		"Peach"
-	}
-
-	local Dropdown = sections.MainSection1:Dropdown({
-		Name = "Dropdown",
-		Multi = false,
-		Required = true,
-		Options = optionTable,
-		Default = 1,
-		Callback = function(Value)
-			print("Dropdown changed: ".. Value)
-		end,
-	}, "Dropdown")
-
-	local MultiDropdown = sections.MainSection1:Dropdown({
-		Name = "Multi Dropdown",
-		Search = true,
-		Multi = true,
-		Required = false,
-		Options = optionTable,
-		Default = {"Apple", "Orange"},
-		Callback = function(Value)
-			local Values = {}
-			for Value, State in next, Value do
-				table.insert(Values, Value)
-			end
-			print("Mutlidropdown changed:", table.concat(Values, ", "))
-		end,
-	}, "MultiDropdown")
-
-	sections.MainSection1:Button({
-		Name = "Update Selection",
-		Callback = function()
-			Dropdown:UpdateSelection("Grapes")
-			MultiDropdown:UpdateSelection({"Banana", "Pineapple"})
-		end,
-	})
-
-	sections.MainSection1:Divider()
-
-	sections.MainSection1:Header({
-		Text = "Header #2"
-	})
-
-	sections.MainSection1:Paragraph({
-		Header = "Paragraph",
-		Body = "Paragraph body. Lorem ipsum odor amet, consectetuer adipiscing elit. Morbi tempus netus aliquet per velit est gravida."
-	})
-
-	sections.MainSection1:Label({
-		Text = "Label. Lorem ipsum odor amet, consectetuer adipiscing elit."
-	})
-
-	sections.MainSection1:SubLabel({
-		Text = "Sub-Label. Lorem ipsum odor amet, consectetuer adipiscing elit."
-	})
-
-	MacLib:SetFolder("Maclib")
-	tabs.Settings:InsertConfigSection("Left")
-
-	Window.onUnloaded(function()
-		print("Unloaded!")
-	end)
-
-	tabs.Main:Select()
-	MacLib:LoadAutoLoadConfig()
+	return character, humanoid, humanoid_root_part
 end
 
-return MacLib
+local sections = {
+	combat_left = tabs.Combat:Section({ Side = "Left" }),
+	combat_left2 = tabs.Combat:Section({ Side = "Left" }),
+	combat_right = tabs.Combat:Section({ Side = "Right" }),
+	combat_right2 = tabs.Combat:Section({ Side = "Right" }),
+	mobility_left = tabs.Mobility:Section({ Side = "Left" }),
+	mobility_right = tabs.Mobility:Section({ Side = "Right" }),
+	mobility_right2 = tabs.Mobility:Section({ Side = "Right" }),
+	render_left = tabs.Render:Section({ Side = "Left" }),
+	utility_left = tabs.UtilityTab:Section({ Side = "Left" }),
+	settings_left = tabs.Settings:Section({ Side = "Left" }),
+	settings_right = tabs.Settings:Section({ Side = "Right" }),
+}
+
+tabs.Combat:Select()
+
+local global_settings = {
+	UIBlurToggle = window:GlobalSetting({
+		Name = "UI Blur",
+		Default = window:GetAcrylicBlurState(),
+		Callback = function(bool)
+			window:SetAcrylicBlurState(bool)
+			window:Notify({
+				Title = window.Settings.Title,
+				Description = (bool and "Enabled" or "Disabled") .. " UI Blur",
+				Lifetime = 5
+			})
+		end,
+	}),
+
+	NotificationToggler = window:GlobalSetting({
+		Name = "Notifications",
+		Default = window:GetNotificationsState(),
+		Callback = function(bool)
+			window:SetNotificationsState(bool)
+			window:Notify({
+				Title = window.Settings.Title,
+				Description = (bool and "Enabled" or "Disabled") .. " Notifications",
+				Lifetime = 5
+			})
+		end,
+	}),
+
+	ShowUserInfo = window:GlobalSetting({
+		Name = "Show User Info",
+		Default = window:GetUserInfoState(),
+		Callback = function(bool)
+			window:SetUserInfoState(bool)
+			window:Notify({
+				Title = window.Settings.Title,
+				Description = (bool and "Showing" or "Redacted") .. " User Info",
+				Lifetime = 5
+			})
+		end,
+	})
+}
+
+Core.Features.Flight = {
+	Enabled = false,
+	VerticalSpeed = 50,
+	HorizontalSpeed = 50
+}
+
+Core.Features.Flight.Flight = sections.mobility_left:Toggle({
+	Name = "Flight",
+	Default = Core.Features.Flight.Enabled,
+	Callback = function(state)
+		Core.Features.Flight.Enabled = state
+
+		if state then
+			Core.Connections.Flight = Services.RunService.PreRender:Connect(function(delta)
+				local character, humanoid, humanoid_root_part = Core:GetParts(LocalPlayer)
+				if not character or not humanoid or not humanoid_root_part then return end
+
+				local move_direction = Vector3.zero
+
+				if Services.UserInputService:IsKeyDown(Enum.KeyCode.W) and not Services.UserInputService:GetFocusedTextBox() then
+					move_direction += Vector3.new(0, 0, 1)
+				end
+				if Services.UserInputService:IsKeyDown(Enum.KeyCode.S) and not Services.UserInputService:GetFocusedTextBox() then
+					move_direction += Vector3.new(0, 0, -1)
+				end
+				if Services.UserInputService:IsKeyDown(Enum.KeyCode.A) and not Services.UserInputService:GetFocusedTextBox() then
+					move_direction += Vector3.new(-1, 0, 0)
+				end
+				if Services.UserInputService:IsKeyDown(Enum.KeyCode.D) and not Services.UserInputService:GetFocusedTextBox() then
+					move_direction += Vector3.new(1, 0, 0)
+				end
+
+				local vertical = 0
+				if (Services.UserInputService:IsKeyDown(Enum.KeyCode.E) or Services.UserInputService:IsKeyDown(Enum.KeyCode.Space))
+					and not Services.UserInputService:GetFocusedTextBox() then
+					vertical = Core.Features.Flight.VerticalSpeed
+				end
+				if Services.UserInputService:IsKeyDown(Enum.KeyCode.Q) and not Services.UserInputService:GetFocusedTextBox() then
+					vertical = -Core.Features.Flight.VerticalSpeed
+				end
+
+				if move_direction.Magnitude > 0 then
+					move_direction = move_direction.Unit * Core.Features.Flight.HorizontalSpeed
+				end
+
+				local forward = Camera.CFrame.LookVector
+				local right = Camera.CFrame.RightVector
+
+				local final_move = (forward * move_direction.Z) + (right * move_direction.X) + (Vector3.yAxis * vertical)
+
+				humanoid_root_part.CFrame += final_move * delta
+
+				local velocity = humanoid_root_part.Velocity
+				humanoid_root_part.Velocity = Vector3.new(velocity.X, 0.5, velocity.Z)
+			end)
+		else
+			if Core.Connections.Flight then
+				Core.Connections.Flight:Disconnect()
+				Core.Connections.Flight = nil
+			end
+		end
+	end,
+}, "Flight")
+
+sections.mobility_left:Slider({
+	Name = "Horizontal Speed",
+	Default = Core.Features.Flight.HorizontalSpeed,
+	Minimum = 0,
+	Maximum = 500,
+	DisplayMethod = "Value",
+	Precision = 1,
+	Callback = function(v) Core.Features.Flight.HorizontalSpeed = v end,
+}, "FlightHorizontalSpeed")
+
+sections.mobility_left:Slider({
+	Name = "Vertical Speed",
+	Default = Core.Features.Flight.VerticalSpeed,
+	Minimum = 0,
+	Maximum = 500,
+	DisplayMethod = "Value",
+	Precision = 1,
+	Callback = function(v) Core.Features.Flight.VerticalSpeed = v end,
+}, "FlightVerticalSpeed")
+
+Core.Keybinds.Flight = sections.mobility_left:Keybind({
+	Name = "Flight Keybind",
+	Blacklist = false,
+	onBindHeld = function(held)
+		if held then
+			Core.Features.Flight.Enabled = not Core.Features.Flight.Enabled
+			Core.Features.Flight:UpdateState(Core.Features.Flight.Enabled)
+		end
+	end,
+}, "FlightKeybind")
+
+task.wait(10)
+
+Core.Features.Flight.Flight:UpdateState(false)
+
+window.onUnloaded(function()
+	Core.Keybinds = {}
+
+	for _, connection in next, Core.Connections do
+		if connection and connection.Disconnect then
+			connection:Disconnect()
+		end
+	end
+
+	Core.Connections = {}
+end)
+
+return Calamari
